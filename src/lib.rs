@@ -14,6 +14,7 @@ pub mod readme {
 macro_rules! element {
 	($name:ident) => {
 		#[inline(always)]
+		#[must_use]
 		pub fn $name<'a>(
 			attributes: &'a [lignin::Attribute<'a>],
 			content: &'a [lignin::Node<'a>],
@@ -32,6 +33,7 @@ macro_rules! element {
 macro_rules! void_element {
 	($name:ident) => {
 		#[inline(always)]
+		#[must_use]
 		pub fn $name<'a>(
 			attributes: &'a [lignin::Attribute<'a>],
 			_: &'a [lignin::Node<'a>; 0],

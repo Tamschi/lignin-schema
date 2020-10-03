@@ -1,0 +1,17 @@
+[package]
+name = "lignin-schema"
+version = "0.0.0"
+authors = ["Tamme Schichler <tamme@schichler.dev>"]
+edition = "2018"
+publish = false
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+heck-but-macros = "0.0.1"
+lignin = "0.0.1"
+
+[features]
+bumpalo-collections = ["lignin/bumpalo-collections"]
+debug = ["lignin/debug"]
+remnants = ["lignin/remnants"]

@@ -1,17 +1,44 @@
 [package]
 name = "lignin-schema"
-version = "0.0.0"
+version = "0.0.1"
 authors = ["Tamme Schichler <tamme@schichler.dev>"]
 edition = "2018"
+description = "An HTML schema interface through which lignin Node trees can be created with efficient compile-time checking."
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/Tamschi/lignin-schema"
+homepage = "https://github.com/Tamschi/lignin-schema/tree/v0.0.1"
+documentation = "https://docs.rs/lignin-schema/0.0.1"
+keywords = ["HMTL", "VDOM"]
+categories = ["web-programming", "rust-patterns"]
+readme = "README.md"
+include = [
+	"**/*.rs",
+	"!tests/unincluded_*.rs", # Tests of meta data files not included in the package.
+	"Cargo.toml",
+	"CHANGELOG.md",
+	"CODE_OF_CONDUCT.md",
+	"LICENSE-*",
+	"README.md",
+]
 publish = false
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[dependencies]
-heck-but-macros = "0.0.1"
-lignin = "0.0.1"
+[badges]
+travis-ci = { repository = "Tamschi/lignin-schema", branch = "develop" }
+is-it-maintained-issue-resolution = { repository = "Tamschi/lignin-schema" }
+is-it-maintained-open-issues = { repository = "Tamschi/lignin-schema" }
+maintenance = { status = "experimental" }
 
 [features]
 bumpalo-collections = ["lignin/bumpalo-collections"]
 debug = ["lignin/debug"]
 remnants = ["lignin/remnants"]
+
+[dependencies]
+heck-but-macros = "0.0.1"
+lignin = "0.0.1"
+
+[dev-dependencies]
+cargo-husky = "1.5.0"
+doc-comment = "0.3.3"
+git_info = "0.1.2"
+version-sync = "0.9.1"

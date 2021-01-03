@@ -1,13 +1,13 @@
 [package]
 name = "lignin-schema"
-version = "0.0.2"
+version = "0.0.3"
 authors = ["Tamme Schichler <tamme@schichler.dev>"]
 edition = "2018"
 description = "An HTML schema interface through which lignin Node trees can be created with efficient compile-time checking."
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/Tamschi/lignin-schema"
-homepage = "https://github.com/Tamschi/lignin-schema/tree/v0.0.2"
-documentation = "https://docs.rs/lignin-schema/0.0.2"
+homepage = "https://github.com/Tamschi/lignin-schema/tree/v0.0.3"
+documentation = "https://docs.rs/lignin-schema/0.0.3"
 keywords = ["HMTL", "VDOM"]
 categories = ["web-programming", "rust-patterns"]
 readme = "README.md"
@@ -32,7 +32,7 @@ debug = ["lignin/debug"]
 
 [dependencies]
 heck-but-macros = "0.0.1"
-lignin = "0.0.2" # public
+lignin = "0.0.3" # public
 
 [dev-dependencies]
 cargo-husky = "1.5.0"

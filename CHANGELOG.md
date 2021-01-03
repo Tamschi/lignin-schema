@@ -1,8 +1,8 @@
 # lignin-schema Changelog
 
-## next
+## 0.0.3
 
-TODO: Date
+2021-01-03
 
 * **Breaking:**
   * Upgraded `lignin` dependency to 0.0.3

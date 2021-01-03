@@ -1,5 +1,12 @@
 # lignin-schema Changelog
 
+## next
+
+TODO: Date
+
+* **Breaking:**
+  * Upgraded `lignin` dependency to 0.0.3
+
 ## 0.0.2
 
 2020-11-30

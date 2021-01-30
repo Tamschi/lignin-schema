@@ -33,7 +33,7 @@ debug = ["lignin/debug"]
 
 [dependencies]
 heck-but-macros = "0.0.1"
-lignin = "0.0.3" # public
+lignin = "0.0.5" # public
 
 [dev-dependencies]
 cargo-husky = "1.5.0"

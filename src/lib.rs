@@ -1,6 +1,6 @@
 #![forbid(unsafe_code)]
 #![no_std]
-#![doc(html_root_url = "https://docs.rs/lignin-schema/0.0.3")]
+#![doc(html_root_url = "https://docs.rs/lignin-schema/0.0.4")]
 #![warn(clippy::pedantic)]
 
 use heck_but_macros::stringify_SHOUTY_SNEK_CASE;

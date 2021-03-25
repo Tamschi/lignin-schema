@@ -2,6 +2,7 @@
 #![no_std]
 #![doc(html_root_url = "https://docs.rs/lignin-schema/0.0.4")]
 #![warn(clippy::pedantic)]
+#![allow(non_camel_case_types)]
 
 #[cfg(doctest)]
 pub mod readme {
@@ -23,40 +24,69 @@ pub struct SomeContent;
 impl MaybeContent for NoContent {}
 impl MaybeContent for SomeContent {}
 
-macro_rules! element {
+macro_rules! element_attribute_trait {
 	($name:ident) => {
-		#[inline(always)]
-		#[must_use]
-		pub fn $name(_: &dyn MaybeContent) -> &'static str {
-			heck_but_macros::stringify_SHOUTY_SNEK_CASE!($name)
-		}
+		pub trait $name: Sealed {}
+		impl<T> $name for T where T: GlobalAttribute {}
 	};
 }
 
-macro_rules! void_element {
-	($name:ident) => {
+macro_rules! elements {
+	($($name:ident),*$(,)?) => {$(
+		#[inline(always)]
+		#[must_use]
+		pub fn $name(_has_content: &dyn MaybeContent, _attributes: &[&dyn $name]) -> &'static str {
+			heck_but_macros::stringify_SHOUTY_SNEK_CASE!($name)
+		}
+
+		element_attribute_trait!($name);
+	)*};
+}
+
+macro_rules! void_elements {
+	($($name:ident),*$(,)?) => {$(
 		#[inline(always)]
 		#[must_use]
 		pub const fn $name(_: &NoContent) -> &'static str {
 			heck_but_macros::stringify_SHOUTY_SNEK_CASE!($name)
 		}
-	};
+
+		element_attribute_trait!($name);
+	)*};
 }
 
-macro_rules! elements {
-    ($($name:ident),+) => {
-        $(element!($name);)+
-    };
-}
-
-macro_rules! void_elements {
-    ($($name:ident),+) => {
-        $(void_element!($name);)+
-    };
+macro_rules! attributes {
+	{$namespace:ident=>
+		$($name:ident  on
+			$([$($(::$subspace:ident::)?$element:ident),*$(,)?])?
+			$(all $($global_marker:ident)?)?
+		),*$(,)?
+	} => {$(
+		pub struct $name;
+		impl $name {
+			#[inline(always)]
+			#[must_use]
+			pub const fn attribute_name() -> &'static str {
+				heck_but_macros::stringify_kebab_case!($name)
+			}
+		}
+		impl Sealed for $name {}
+		$($(
+			#[allow(deprecated)]
+			impl crate::$namespace::$($subspace::)?$element for $name {}
+		)*)?
+		$(
+			impl crate::$namespace::GlobalAttribute for $name {}
+			$(compile_error!($global_marker))?
+		)?
+	)*};
 }
 
 pub mod html {
-	use super::{MaybeContent, NoContent};
+	use crate::Sealed;
+	use crate::{MaybeContent, NoContent};
+
+	pub trait GlobalAttribute: Sealed {}
 
 	//SEE: https://developer.mozilla.org/en-US/docs/Web/HTML/Element
 	// Main root
@@ -105,7 +135,7 @@ pub mod html {
 	#[deprecated = "To quote MDN: Warning: \"These are old HTML elements which are deprecated and should not be used. You should never use them in new projects, and should replace them in old projects as soon as you can. They are listed here for informational purposes only.\""]
 	/// Don't actually use these. They're broken or could break at a moment's notice (or without notice, for that matter...).
 	pub mod deprecated {
-		use super::{MaybeContent, NoContent};
+		use super::{GlobalAttribute, MaybeContent, NoContent, Sealed};
 
 		elements!(
 			acronym, applet, big, blink, center, content, dir, element, font, frameset, listing,
@@ -116,5 +146,27 @@ pub mod html {
 			image, // The spec doesn't actually say whether this allows content.
 			isindex, keygen, menuitem, nextid, spacer
 		);
+	}
+
+	pub mod attributes {
+		use super::Sealed;
+
+		attributes! {html=>
+			accept on [input],
+			//accept_charset on [form],
+			accesskey on all,
+			action on [form],
+			align on [::deprecated::applet, caption, col, colgroup, hr, iframe, img, table, tbody, td, tfoot, th, thead, tr],
+			allow on [iframe],
+		}
+
+		/// Deprecated attributes and deprecated usages of attributes.
+		pub mod deprecrated {
+			use super::Sealed;
+
+			attributes! {html=>
+				accept on [form],
+			}
+		}
 	}
 }

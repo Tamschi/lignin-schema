@@ -27,7 +27,7 @@ macro_rules! element {
 	($name:ident) => {
 		#[inline(always)]
 		#[must_use]
-		pub fn $name(_: impl MaybeContent) -> &'static str {
+		pub fn $name(_: &dyn MaybeContent) -> &'static str {
 			heck_but_macros::stringify_SHOUTY_SNEK_CASE!($name)
 		}
 	};
@@ -37,7 +37,7 @@ macro_rules! void_element {
 	($name:ident) => {
 		#[inline(always)]
 		#[must_use]
-		pub const fn $name(_: NoContent) -> &'static str {
+		pub const fn $name(_: &NoContent) -> &'static str {
 			heck_but_macros::stringify_SHOUTY_SNEK_CASE!($name)
 		}
 	};

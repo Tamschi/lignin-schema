@@ -83,8 +83,7 @@ macro_rules! attributes {
 }
 
 pub mod html {
-	use crate::Sealed;
-	use crate::{MaybeContent, NoContent};
+	use crate::{MaybeContent, NoContent, Sealed};
 
 	pub trait GlobalAttribute: Sealed {}
 

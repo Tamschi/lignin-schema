@@ -13,9 +13,9 @@
 [![open pull requests](https://img.shields.io/github/issues-pr-raw/Tamschi/lignin-schema)](https://github.com/Tamschi/lignin-schema/pulls)
 [![crev reviews](https://web.crev.dev/rust-reviews/badge/crev_count/lignin-schema.svg)](https://web.crev.dev/rust-reviews/crate/lignin-schema/)
 
-An HTML schema interface through which [lignin] Node trees can be created with efficient compile-time checking.
+TODO: Description.
 
-[lignin]: https://github.com/Tamschi/lignin
+Works well alongside [lignin](https://github.com/Tamschi/lignin) but does not depend on it.
 
 ## Installation
 

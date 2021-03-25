@@ -2,6 +2,14 @@
 
 <!-- markdownlint-disable no-trailing-punctuation -->
 
+## next
+
+TODO: Date
+
+* **Breaking:**
+  * All functions now accept only a single parameter indicating whether there is any content.
+  * All functions now only return the element's tag name as `&'static str`.
+
 ## 0.0.4
 
 2021-01-30

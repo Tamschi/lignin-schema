@@ -56,8 +56,7 @@ macro_rules! void_elements {
 }
 
 pub mod html {
-	use super::MaybeContent;
-	use super::NoContent;
+	use super::{MaybeContent, NoContent};
 
 	//SEE: https://developer.mozilla.org/en-US/docs/Web/HTML/Element
 	// Main root
@@ -106,8 +105,7 @@ pub mod html {
 	#[deprecated = "To quote MDN: Warning: \"These are old HTML elements which are deprecated and should not be used. You should never use them in new projects, and should replace them in old projects as soon as you can. They are listed here for informational purposes only.\""]
 	/// Don't actually use these. They're broken or could break at a moment's notice (or without notice, for that matter...).
 	pub mod deprecated {
-		use super::MaybeContent;
-		use super::NoContent;
+		use super::{MaybeContent, NoContent};
 
 		elements!(
 			acronym, applet, big, blink, center, content, dir, element, font, frameset, listing,

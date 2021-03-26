@@ -76,7 +76,7 @@ macro_rules! void_elements {
 		)?
 		#[inline(always)]
 		#[must_use]
-		pub const fn $name(_: &NoContent) -> &'static str {
+		pub fn $name(_: &NoContent, _attributes: &[&dyn $name]) -> &'static str {
 			heck_but_macros::stringify_SHOUTY_SNEK_CASE!($name)
 		}
 

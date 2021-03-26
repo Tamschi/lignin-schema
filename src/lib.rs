@@ -626,7 +626,7 @@ pub trait Event: Sealed {
 ///
 /// Implied by [↕️ - Bubbles](#---bubbles).
 pub mod events {
-	use super::{Event, Sealed, Yes, No, Global};
+	use super::{Event, Global, No, Sealed, Yes};
 
 	macro_rules! events {
 		($(
@@ -639,9 +639,9 @@ pub mod events {
 			)?
 			$(cancelable $(!$cancelable:tt)?)?
 			$(non-standard $(!$non_standard:tt)?)?
-	
+
 		),*$(,)?) => {$(
-			
+
 			$(
 				#[deprecated = "This feature is no longer recommended."]
 				/// `deprecated`
@@ -677,7 +677,7 @@ pub mod events {
 					#[cfg(FALSE)]
 				)?
 				type Bubbles = No;
-	
+
 				$(
 					type Cancelable = Yes;
 					$(compile_error!($cancelable))?

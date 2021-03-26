@@ -214,7 +214,7 @@ pub mod html {
 	pub mod attributes {
 		use super::Sealed;
 
-		pub use crate::aria_attributes;
+		pub use crate::aria_attributes::*;
 
 		attributes! {html=>
 			accept on [input, -form],
@@ -481,20 +481,20 @@ pub mod svg {
 	pub mod attributes {
 		use super::Sealed;
 
-		pub use crate::aria_attributes;
+		pub use crate::aria_attributes::*;
 
 		attributes! {svg=>
 		}
 	}
 }
 
+pub trait AriaAttribute: Sealed {}
+impl<T: AriaAttribute> crate::html::GlobalAttribute for T {}
+impl<T: AriaAttribute> crate::svg::GlobalAttribute for T {}
+
 /// See <https://www.w3.org/TR/wai-aria-1.1/#state_prop_def>.
 pub mod aria_attributes {
-	use crate::Sealed;
-
-	pub trait AriaAttribute: Sealed {}
-	impl<T: AriaAttribute> crate::html::GlobalAttribute for T {}
-	impl<T: AriaAttribute> crate::svg::GlobalAttribute for T {}
+	use crate::{AriaAttribute, Sealed};
 
 	macro_rules! aria_attributes {
 		{$(
@@ -524,8 +524,7 @@ pub mod aria_attributes {
 				#[inline(always)]
 				#[must_use]
 				pub const fn attribute_name() -> &'static str {
-					// heck_but_macros::stringify_kebab_case!($name)
-					"TODO"
+					heck_but_macros::stringify_kebab_case!($name)
 				}
 			}
 			#[allow(deprecated)]
@@ -537,52 +536,52 @@ pub mod aria_attributes {
 
 	aria_attributes!(
 		role,
-		aria_activedescendant,
-		aria_atomic,
-		aria_autocomplete,
-		aria_busy,
-		aria_checked,
-		aria_colcount,
-		aria_colindex,
-		aria_colspan,
-		aria_controls,
-		aria_current,
-		aria_describedby,
-		aria_details,
-		aria_disabled,
-		aria_dropeffect,
-		aria_errormessage,
-		aria_flowto,
-		aria_grabbed,
-		aria_haspopup,
-		aria_hidden,
-		aria_invalid,
-		aria_keyshortcuts,
-		aria_label,
-		aria_labelledby,
-		aria_level,
-		aria_live,
-		aria_modal,
-		aria_multiline,
-		aria_multiselectable,
-		aria_orientation,
-		aria_owns,
-		aria_placeholder,
-		aria_posinset,
-		aria_pressed,
-		aria_readonly,
-		aria_relevant,
-		aria_required,
-		aria_roledescription,
-		aria_rowcount,
-		aria_rowindex,
-		aria_rowspan,
-		aria_selected,
-		aria_setsize,
-		aria_sort,
-		aria_valuemax,
-		aria_valuemin,
-		aria_valuenow,
-		aria_valuetext,
+		// aria_activedescendant,
+		// aria_atomic,
+		// aria_autocomplete,
+		// aria_busy,
+		// aria_checked,
+		// aria_colcount,
+		// aria_colindex,
+		// aria_colspan,
+		// aria_controls,
+		// aria_current,
+		// aria_describedby,
+		// aria_details,
+		// aria_disabled,
+		// aria_dropeffect,
+		// aria_errormessage,
+		// aria_flowto,
+		// aria_grabbed,
+		// aria_haspopup,
+		// aria_hidden,
+		// aria_invalid,
+		// aria_keyshortcuts,
+		// aria_label,
+		// aria_labelledby,
+		// aria_level,
+		// aria_live,
+		// aria_modal,
+		// aria_multiline,
+		// aria_multiselectable,
+		// aria_orientation,
+		// aria_owns,
+		// aria_placeholder,
+		// aria_posinset,
+		// aria_pressed,
+		// aria_readonly,
+		// aria_relevant,
+		// aria_required,
+		// aria_roledescription,
+		// aria_rowcount,
+		// aria_rowindex,
+		// aria_rowspan,
+		// aria_selected,
+		// aria_setsize,
+		// aria_sort,
+		// aria_valuemax,
+		// aria_valuemin,
+		// aria_valuenow,
+		// aria_valuetext,
 	);
 }

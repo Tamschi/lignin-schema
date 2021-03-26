@@ -349,3 +349,137 @@ pub mod html {
 		}
 	}
 }
+
+// Replace element macros due to different name casing.
+macro_rules! elements {
+	($(
+		$(-$(-$deprecated:tt)?)?
+		$name:ident
+	),*$(,)?) => {$(
+		#[allow(deprecated)]
+		#[allow(non_snake_case)]
+		$(
+			#[deprecated = "To quote MDN: Warning: \"These are old SVG elements which are deprecated and should not be used. You should never use them in new projects, and should replace them in old projects as soon as you can. They are listed here for informational purposes only.\""]
+			$(compile_error!($deprecated))?
+		)?
+		#[inline(always)]
+		#[must_use]
+		pub fn $name(_has_content: &dyn MaybeContent, _attributes: &[&dyn $name]) -> &'static str {
+			stringify!($name)
+		}
+
+		element_attribute_trait!(
+			$(
+				-
+				$(compile_error!($deprecated))?
+			)?
+			$name
+		);
+	)*};
+}
+macro_rules! void_elements {
+	($(
+		$(-$(-$deprecated:tt)?)?
+		$name:ident
+	),*$(,)?) => {$(
+		#[allow(non_snake_case)]
+		$(
+			#[deprecated = "To quote MDN: Warning: \"These are old SVG elements which are deprecated and should not be used. You should never use them in new projects, and should replace them in old projects as soon as you can. They are listed here for informational purposes only.\""]
+			$(compile_error!($deprecated))?
+		)?
+		#[inline(always)]
+		#[must_use]
+		pub fn $name(_: &NoContent, _attributes: &[&dyn $name]) -> &'static str {
+			stringify!($name)
+		}
+
+		element_attribute_trait!($name);
+	)*};
+}
+
+pub mod svg {
+	use crate::Sealed;
+
+	pub trait GlobalAttribute: Sealed {}
+
+	/// See <https://developer.mozilla.org/en-US/docs/Web/SVG/Element>.
+	pub mod elements {
+		use super::GlobalAttribute;
+		use crate::{MaybeContent, NoContent, Sealed};
+
+		// Animation elements
+		elements!(
+			-animateColor,
+			animateMotion,
+			animateTransform,
+			discard,
+			mpath,
+			set
+		);
+		void_elements!(animate,); //?
+
+		// Basic shapes
+		elements!(circle, ellipse, line, polygon, polyline, rect);
+
+		// Container elements
+		//BUG: Fix casing so that it's `"missing-glyph"`!
+		elements!(
+			a,
+			defs,
+			g,
+			marker,
+			mask,
+			missing_glyph,
+			pattern,
+			svg,
+			switch,
+			symbol,
+			unknown,
+		);
+
+		// Descriptive elements
+		elements!(desc, metadata, title);
+
+		// Filter primitive elements
+		elements!(
+			feBlend,
+			feColorMatrix,
+			feComponentTransfer,
+			feComposite,
+			feConvolveMatrix,
+			feDiffuseLighting,
+			feDisplacementMap,
+			feDropShadow,
+			feFlood,
+			feFuncA,
+			feFuncB,
+			feFuncG,
+			feFuncR,
+			feGaussianBlur,
+			feImage,
+			feMerge,
+			feMergeNode,
+			feMorphology,
+			feOffset,
+			feSpecularLighting,
+			feTile,
+			feTurbulence,
+		);
+
+		// Font elements
+		//BUG: Fix casing!
+		elements!(-font, -font_face, -font_face_src, -font_face_uri);
+		void_elements!(-font_face_format, -font_face_name, -hkern, -vkern);
+
+		// Gradient elements
+		elements!(linearGradient, meshgradient, radialGradient, stop); //TODO: Check casing on `meshgradient`.
+	}
+
+	/// See <https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes>.
+	pub mod attributes {
+		use super::Sealed;
+
+		attributes! {html=>
+		}
+	}
+}

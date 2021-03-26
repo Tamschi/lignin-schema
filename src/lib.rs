@@ -25,8 +25,16 @@ impl MaybeContent for NoContent {}
 impl MaybeContent for SomeContent {}
 
 macro_rules! element_attribute_trait {
-	($name:ident) => {
+	(
+		$(-$(-$deprecated:tt)?)?
+		$name:ident
+	) => {
+		$(
+			#[deprecated = "To quote MDN: Warning: \"These are old HTML elements which are deprecated and should not be used. You should never use them in new projects, and should replace them in old projects as soon as you can. They are listed here for informational purposes only.\""]
+			$(compile_error!($deprecated))?
+		)?
 		pub trait $name: Sealed {}
+		#[allow(deprecated)]
 		impl<T> $name for T where T: GlobalAttribute {}
 	};
 }
@@ -36,6 +44,7 @@ macro_rules! elements {
 		$(-$(-$deprecated:tt)?)?
 		$name:ident
 	),*$(,)?) => {$(
+		#[allow(deprecated)]
 		$(
 			#[deprecated = "To quote MDN: Warning: \"These are old HTML elements which are deprecated and should not be used. You should never use them in new projects, and should replace them in old projects as soon as you can. They are listed here for informational purposes only.\""]
 			$(compile_error!($deprecated))?
@@ -46,7 +55,13 @@ macro_rules! elements {
 			heck_but_macros::stringify_SHOUTY_SNEK_CASE!($name)
 		}
 
-		element_attribute_trait!($name);
+		element_attribute_trait!(
+			$(
+				-
+				$(compile_error!($deprecated))?
+			)?
+			$name
+		);
 	)*};
 }
 
@@ -116,7 +131,7 @@ macro_rules! attributes {
 				$(compile_error!($deprecated_impl))?
 			)?
 			#[allow(deprecated)]
-			impl crate::$namespace::$element for $name {}
+			impl crate::$namespace::elements::$element for $name {}
 		)*)?
 		$(
 			#[allow(deprecated)]
@@ -127,65 +142,73 @@ macro_rules! attributes {
 }
 
 pub mod html {
-	use crate::{MaybeContent, NoContent, Sealed};
+	use crate::Sealed;
 
 	pub trait GlobalAttribute: Sealed {}
 
-	//SEE: https://developer.mozilla.org/en-US/docs/Web/HTML/Element
-	// Main root
-	elements!(html);
-	// Document metadata
-	elements!(head, style, title);
-	void_elements!(base, link, meta);
-	// Sectioning root
-	elements!(body);
-	// Content sectioning
-	elements!(
-		address, article, aside, footer, header, h1, h2, h3, h4, h5, h6, hgroup, main, nav, section
-	);
-	// Text content
-	elements!(blockquote, dd, div, dl, dt, figcaption, figure, hr, li, /*main,*/ ol, p, pre, ul);
-	// Inline text semantics
-	elements!(
-		a, abbr, b, bdi, bdo, cite, code, data, dfn, em, i, kbd, mark, q, rb, rp, rt, rtc, ruby, s,
-		samp, small, span, strong, sub, sup, time, u, var
-	);
-	void_elements!(br, wbr);
-	// Image and multimedia
-	elements!(audio, map, video);
-	void_elements!(area, img, track);
-	// Embedded content
-	elements!(iframe, object, picture);
-	void_elements!(embed, param, source);
-	// Scripting
-	elements!(canvas, noscript, script);
-	// Demarcating edits
-	elements!(del, ins);
-	// Table content
-	elements!(caption, colgroup, table, tbody, td, tfoot, th, thead, tr);
-	void_elements!(col);
-	// Forms
-	elements!(
-		button, datalist, fieldset, form, label, legend, meter, optgroup, option, output, progress,
-		select, textarea
-	);
-	void_elements!(input);
-	// Interactive elements
-	elements!(details, dialog, menu, summary);
-	// Web components
-	elements!(slot, template);
+	/// See <https://developer.mozilla.org/en-US/docs/Web/HTML/Element>.
+	pub mod elements {
+		use super::GlobalAttribute;
+		use crate::{MaybeContent, NoContent, Sealed};
 
-	// Deprecated
-	elements!(
-		-acronym, -applet, -big, -blink, -center, -content, -dir, -element, -font, -frameset,
-		-listing, -marquee, -multicol, -nobr, -noembed, -noframes, -plaintext, -shadow, -strike,
-		-tt, -xmp,
-	);
-	void_elements!(
-		-basefont, -bgsound, -command, -frame,
-		-image, // The spec doesn't actually say whether this allows content.
-		-isindex, -keygen, -menuitem, -nextid, -spacer
-	);
+		// Main root
+		elements!(html);
+		// Document metadata
+		elements!(head, style, title);
+		void_elements!(base, link, meta);
+		// Sectioning root
+		elements!(body);
+		// Content sectioning
+		elements!(
+			address, article, aside, footer, header, h1, h2, h3, h4, h5, h6, hgroup, main, nav,
+			section
+		);
+		// Text content
+		elements!(
+			blockquote, dd, div, dl, dt, figcaption, figure, hr, li, /*main,*/ ol, p, pre, ul
+		);
+		// Inline text semantics
+		elements!(
+			a, abbr, b, bdi, bdo, cite, code, data, dfn, em, i, kbd, mark, q, rb, rp, rt, rtc,
+			ruby, s, samp, small, span, strong, sub, sup, time, u, var
+		);
+		void_elements!(br, wbr);
+		// Image and multimedia
+		elements!(audio, map, video);
+		void_elements!(area, img, track);
+		// Embedded content
+		elements!(iframe, object, picture);
+		void_elements!(embed, param, source);
+		// Scripting
+		elements!(canvas, noscript, script);
+		// Demarcating edits
+		elements!(del, ins);
+		// Table content
+		elements!(caption, colgroup, table, tbody, td, tfoot, th, thead, tr);
+		void_elements!(col);
+		// Forms
+		elements!(
+			button, datalist, fieldset, form, label, legend, meter, optgroup, option, output,
+			progress, select, textarea
+		);
+		void_elements!(input);
+		// Interactive elements
+		elements!(details, dialog, menu, summary);
+		// Web components
+		elements!(slot, template);
+
+		// Deprecated
+		elements!(
+			-acronym, -applet, -big, -blink, -center, -content, -dir, -element, -font, -frameset,
+			-listing, -marquee, -multicol, -nobr, -noembed, -noframes, -plaintext, -shadow,
+			-strike, -tt, -xmp,
+		);
+		void_elements!(
+			-basefont, -bgsound, -command, -frame,
+			-image, // The spec doesn't actually say whether this allows content.
+			-isindex, -keygen, -menuitem, -nextid, -spacer
+		);
+	}
 
 	/// See <https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes>.
 	pub mod attributes {

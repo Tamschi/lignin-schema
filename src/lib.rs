@@ -157,6 +157,22 @@ pub mod html {
 			action on [form],
 			align on [::deprecated::applet, caption, col, colgroup, hr, iframe, img, table, tbody, td, tfoot, th, thead, tr],
 			allow on [iframe],
+			alt on [::deprecated::applet, area, img, input],
+			//r#async on [script],
+			autocapitalize on all,
+			autocomplete on [form, input, select, textarea],
+			autofocus on [button, input, ::deprecated::keygen, select, textarea],
+			autoplay on [audio, video],
+			buffered on [audio, video],
+			capture on [input],
+			challenge on [::deprecated::keygen],
+			charset on [meta, script],
+			checked on [::deprecated::command, input],
+			cite on [blockquote, del, ins, q],
+			class on all,
+			code on [::deprecated::applet],
+			codebase on [::deprecated::applet],
+			cols on [textarea],
 		}
 
 		/// Deprecated attributes and deprecated usages of attributes.
@@ -165,6 +181,10 @@ pub mod html {
 
 			attributes! {html=>
 				accept on [form],
+				background on [body, table, td, th],
+				bgcolor on [body, col, colgroup, ::deprecated::marquee, table, tbody, tfoot, td, th, tr],
+				border on [img, object, table],
+				color on [::deprecated::basefont, ::deprecated::font, hr],
 			}
 		}
 	}

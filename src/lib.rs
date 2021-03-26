@@ -166,8 +166,8 @@ pub mod html {
 	void_elements!(col);
 	// Forms
 	elements!(
-		button, datalist, fieldset, form, label, legend, meter, optgroup, option, output, progress, select,
-		textarea
+		button, datalist, fieldset, form, label, legend, meter, optgroup, option, output, progress,
+		select, textarea
 	);
 	void_elements!(input);
 	// Interactive elements

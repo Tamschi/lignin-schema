@@ -214,6 +214,8 @@ pub mod html {
 	pub mod attributes {
 		use super::Sealed;
 
+		pub use crate::aria_attributes;
+
 		attributes! {html=>
 			accept on [input, -form],
 			// accept_charset on [form],
@@ -479,7 +481,108 @@ pub mod svg {
 	pub mod attributes {
 		use super::Sealed;
 
-		attributes! {html=>
+		pub use crate::aria_attributes;
+
+		attributes! {svg=>
 		}
 	}
+}
+
+/// See <https://www.w3.org/TR/wai-aria-1.1/#state_prop_def>.
+pub mod aria_attributes {
+	use crate::Sealed;
+
+	pub trait AriaAttribute: Sealed {}
+	impl<T: AriaAttribute> crate::html::GlobalAttribute for T {}
+	impl<T: AriaAttribute> crate::svg::GlobalAttribute for T {}
+
+	macro_rules! aria_attributes {
+		{$(
+			$(-$(-$deprecated:tt)?)?
+			$(*$(*$experimental:tt)?)?
+			$(!$(!$obsolete:tt)?)?
+			$name:ident
+		),*$(,)?} => {$(
+			$(
+				#[deprecated = "This deprecated API should no longer be used, but will probably still work."]
+				/// `deprecated`
+				$(compile_error!($deprecated))?
+			)?
+			$(
+				#[deprecated = "This is an experimental API that should not be used in production code."]
+				/// `experimental`
+				$(compile_error!($experimental))?
+			)?
+			$(
+				#[deprecated = "This is an obsolete API and is no longer guaranteed to work."]
+				/// `obsolete`
+				$(compile_error!($obsolete))?
+			)?
+			pub struct $name;
+			#[allow(deprecated)]
+			impl $name {
+				#[inline(always)]
+				#[must_use]
+				pub const fn attribute_name() -> &'static str {
+					// heck_but_macros::stringify_kebab_case!($name)
+					"TODO"
+				}
+			}
+			#[allow(deprecated)]
+			impl Sealed for $name {}
+			#[allow(deprecated)]
+			impl AriaAttribute for $name {}
+		)*};
+	}
+
+	aria_attributes!(
+		role,
+		aria_activedescendant,
+		aria_atomic,
+		aria_autocomplete,
+		aria_busy,
+		aria_checked,
+		aria_colcount,
+		aria_colindex,
+		aria_colspan,
+		aria_controls,
+		aria_current,
+		aria_describedby,
+		aria_details,
+		aria_disabled,
+		aria_dropeffect,
+		aria_errormessage,
+		aria_flowto,
+		aria_grabbed,
+		aria_haspopup,
+		aria_hidden,
+		aria_invalid,
+		aria_keyshortcuts,
+		aria_label,
+		aria_labelledby,
+		aria_level,
+		aria_live,
+		aria_modal,
+		aria_multiline,
+		aria_multiselectable,
+		aria_orientation,
+		aria_owns,
+		aria_placeholder,
+		aria_posinset,
+		aria_pressed,
+		aria_readonly,
+		aria_relevant,
+		aria_required,
+		aria_roledescription,
+		aria_rowcount,
+		aria_rowindex,
+		aria_rowspan,
+		aria_selected,
+		aria_setsize,
+		aria_sort,
+		aria_valuemax,
+		aria_valuemin,
+		aria_valuenow,
+		aria_valuetext,
+	);
 }

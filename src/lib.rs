@@ -18,6 +18,10 @@ mod private {
 }
 use private::Sealed;
 
+pub trait Global: Sealed {}
+impl<T> html::Global for T where T: Global {}
+impl<T> svg::Global for T where T: Global {}
+
 pub trait MaybeContent: Sealed {}
 pub struct NoContent;
 pub struct SomeContent;
@@ -35,7 +39,7 @@ macro_rules! element_attribute_trait {
 		)?
 		pub trait $name: Sealed {}
 		#[allow(deprecated)]
-		impl<T> $name for T where T: GlobalAttribute {}
+		impl<T> $name for T where T: Global {}
 	};
 }
 
@@ -135,7 +139,7 @@ macro_rules! attributes {
 		)*)?
 		$(
 			#[allow(deprecated)]
-			impl crate::$namespace::GlobalAttribute for $name {}
+			impl crate::$namespace::Global for $name {}
 			$(compile_error!($global_marker))?
 		)?
 	)*};
@@ -144,11 +148,11 @@ macro_rules! attributes {
 pub mod html {
 	use crate::Sealed;
 
-	pub trait GlobalAttribute: Sealed {}
+	pub trait Global: Sealed {}
 
 	/// See <https://developer.mozilla.org/en-US/docs/Web/HTML/Element>.
 	pub mod elements {
-		use super::GlobalAttribute;
+		use super::Global;
 		use crate::{MaybeContent, NoContent, Sealed};
 
 		// Main root
@@ -402,11 +406,11 @@ macro_rules! void_elements {
 pub mod svg {
 	use crate::Sealed;
 
-	pub trait GlobalAttribute: Sealed {}
+	pub trait Global: Sealed {}
 
 	/// See <https://developer.mozilla.org/en-US/docs/Web/SVG/Element>.
 	pub mod elements {
-		use super::GlobalAttribute;
+		use super::Global;
 		use crate::{MaybeContent, NoContent, Sealed};
 
 		// Animation elements
@@ -489,8 +493,7 @@ pub mod svg {
 }
 
 pub trait AriaAttribute: Sealed {}
-impl<T: AriaAttribute> crate::html::GlobalAttribute for T {}
-impl<T: AriaAttribute> crate::svg::GlobalAttribute for T {}
+impl<T> Global for T where T: AriaAttribute {}
 
 /// See <https://www.w3.org/TR/wai-aria-1.1/#state_prop_def>.
 pub mod aria_attributes {
@@ -583,5 +586,149 @@ pub mod aria_attributes {
 		// aria_valuemin,
 		// aria_valuenow,
 		// aria_valuetext,
+	);
+}
+
+pub trait YesNo: Sealed {
+	const IS_YES: bool;
+}
+pub struct Yes;
+impl Sealed for Yes {}
+impl YesNo for Yes {
+	const IS_YES: bool = true;
+}
+pub struct No;
+impl Sealed for No {}
+impl YesNo for No {
+	const IS_YES: bool = false;
+}
+
+pub trait Event: Sealed {
+	const NAME: &'static str;
+	type Bubbles: YesNo;
+	type Cancelable: YesNo;
+}
+
+/// See <https://developer.mozilla.org/en-US/docs/Web/Events#event_listing>.
+///
+/// This module only covers associations on [***Element***](https://developer.mozilla.org/en-US/docs/Web/API/Element)
+/// and some derived types.
+///
+/// # Legend
+///
+/// ## ↕️ - Bubbles
+///
+/// ## ⏹️ - Cancelable
+///
+/// ## 🌐 - Global(-ish)
+///
+/// The event is available on any [***Element***](https://developer.mozilla.org/en-US/docs/Web/API/Element).
+///
+/// Implied by [↕️ - Bubbles](#---bubbles).
+pub mod events {
+	use super::{Event, Sealed, Yes, No, Global};
+
+	macro_rules! events {
+		($(
+			$(- $(!$deprecated:tt)?)?
+			$name:ident
+			$(bubbles $(!$bubbles:tt)?)?
+			$(on
+				$([$($namespace:ident::$element:ident),*$(,)?])?
+				$(all $(!$all:tt)?)?
+			)?
+			$(cancelable $(!$cancelable:tt)?)?
+			$(non-standard $(!$non_standard:tt)?)?
+	
+		),*$(,)?) => {$(
+			
+			$(
+				#[deprecated = "This feature is no longer recommended."]
+				/// `deprecated`
+				$(compile_error!($deprecated))?
+			)?
+			$(
+				#[deprecated = "This feature is non-standard and is not on a standards track."]
+				/// `non-standard`
+				$(compile_error!($non_standard))?
+			)?
+			$(
+				/// ↕️
+				$(compile_error!($bubbles))?
+			)?
+			$(
+				/// ⏹️
+				$(compile_error!($cancelable))?
+			)?
+			$($(
+				/// 🌐
+				$(compile_error!($all))?
+			)?)?
+			#[allow(clippy::upper_case_acronyms)]
+			pub struct $name;
+			#[allow(deprecated)]
+			impl Sealed for $name {}
+			#[allow(deprecated)]
+			impl Event for $name {
+				const NAME: &'static str = stringify!($name);
+				$(
+					type Bubbles = Yes;
+					$(compile_error!($bubbles))?
+					#[cfg(FALSE)]
+				)?
+				type Bubbles = No;
+	
+				$(
+					type Cancelable = Yes;
+					$(compile_error!($cancelable))?
+					#[cfg(FALSE)]
+				)?
+				type Cancelable = No;
+			}
+			$(
+				#[allow(deprecated)]
+				impl Global for $name {}
+				$(compile_error!($bubbles))?
+			)?
+			$(
+				$($(
+					impl crate::$namespace::elements::$element for $name {}
+				)*)?
+				$(
+					impl Global for $name {}
+					$(compile_error!($all))?
+				)?
+			)?
+		)*};
+	}
+
+	events!(
+		// Element
+		afterscriptexecute bubbles non-standard,
+		auxclick bubbles cancelable,
+		beforescriptexecute bubbles cancelable non-standard,
+		blur on all,
+		click bubbles cancelable,
+		compositionend bubbles cancelable,
+		compositionstart bubbles cancelable,
+		compositionupdate bubbles cancelable,
+		contextmenu bubbles cancelable,
+		copy bubbles cancelable,
+		cut bubbles cancelable,
+		dblclick bubbles cancelable,
+		-DOMActivate bubbles cancelable,
+		DOMMouseScroll bubbles cancelable non-standard,
+		error on all,
+		focusin bubbles,
+		focusout bubbles,
+		focus on all,
+		fullscreenchange bubbles,
+		fullscreenerror bubbles,
+		gesturechange on [] non-standard,
+		gestureend on [] non-standard,
+		gesturestart on [] non-standard,
+		keydown bubbles cancelable,
+		-keypress bubbles cancelable,
+		keyup bubbles cancelable,
 	);
 }

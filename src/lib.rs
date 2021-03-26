@@ -32,7 +32,14 @@ macro_rules! element_attribute_trait {
 }
 
 macro_rules! elements {
-	($($name:ident),*$(,)?) => {$(
+	($(
+		$(-$(-$deprecated:tt)?)?
+		$name:ident
+	),*$(,)?) => {$(
+		$(
+			#[deprecated = "To quote MDN: Warning: \"These are old HTML elements which are deprecated and should not be used. You should never use them in new projects, and should replace them in old projects as soon as you can. They are listed here for informational purposes only.\""]
+			$(compile_error!($deprecated))?
+		)?
 		#[inline(always)]
 		#[must_use]
 		pub fn $name(_has_content: &dyn MaybeContent, _attributes: &[&dyn $name]) -> &'static str {
@@ -44,7 +51,14 @@ macro_rules! elements {
 }
 
 macro_rules! void_elements {
-	($($name:ident),*$(,)?) => {$(
+	($(
+		$(-$(-$deprecated:tt)?)?
+		$name:ident
+	),*$(,)?) => {$(
+		$(
+			#[deprecated = "To quote MDN: Warning: \"These are old HTML elements which are deprecated and should not be used. You should never use them in new projects, and should replace them in old projects as soon as you can. They are listed here for informational purposes only.\""]
+			$(compile_error!($deprecated))?
+		)?
 		#[inline(always)]
 		#[must_use]
 		pub const fn $name(_: &NoContent) -> &'static str {
@@ -57,12 +71,22 @@ macro_rules! void_elements {
 
 macro_rules! attributes {
 	{$namespace:ident=>
-		$($name:ident  on
-			$([$($(::$subspace:ident::)?$element:ident),*$(,)?])?
+		$(
+			$(-$(-$deprecated:tt)?)?
+			$name:ident on
+			$([$(
+				$(-$(-$deprecated_impl:tt)?)?
+				$element:ident
+			),*$(,)?])?
 			$(all $($global_marker:ident)?)?
 		),*$(,)?
 	} => {$(
+		$(
+			#[deprecated = "TODO"]
+			$(compile_error!($deprecated))?
+		)?
 		pub struct $name;
+		#[allow(deprecated)]
 		impl $name {
 			#[inline(always)]
 			#[must_use]
@@ -70,10 +94,16 @@ macro_rules! attributes {
 				heck_but_macros::stringify_kebab_case!($name)
 			}
 		}
+		#[allow(deprecated)]
 		impl Sealed for $name {}
 		$($(
+			$(
+				#[allow(useless_deprecated)] //TODO: Where else to put this?
+				#[deprecated = "TODO"]
+				$(compile_error!($deprecated_impl))?
+			)?
 			#[allow(deprecated)]
-			impl crate::$namespace::$($subspace::)?$element for $name {}
+			impl crate::$namespace::$element for $name {}
 		)*)?
 		$(
 			impl crate::$namespace::GlobalAttribute for $name {}
@@ -131,61 +161,48 @@ pub mod html {
 	// Web components
 	elements!(slot, template);
 
-	#[deprecated = "To quote MDN: Warning: \"These are old HTML elements which are deprecated and should not be used. You should never use them in new projects, and should replace them in old projects as soon as you can. They are listed here for informational purposes only.\""]
-	/// Don't actually use these. They're broken or could break at a moment's notice (or without notice, for that matter...).
-	pub mod deprecated {
-		use super::{GlobalAttribute, MaybeContent, NoContent, Sealed};
-
-		elements!(
-			acronym, applet, big, blink, center, content, dir, element, font, frameset, listing,
-			marquee, multicol, nobr, noembed, noframes, plaintext, shadow, strike, tt, xmp
-		);
-		void_elements!(
-			basefont, bgsound, command, frame,
-			image, // The spec doesn't actually say whether this allows content.
-			isindex, keygen, menuitem, nextid, spacer
-		);
-	}
+	// Deprecated
+	elements!(
+		-acronym, -applet, -big, -blink, -center, -content, -dir, -element, -font, -frameset,
+		-listing, -marquee, -multicol, -nobr, -noembed, -noframes, -plaintext, -shadow, -strike,
+		-tt, -xmp,
+	);
+	void_elements!(
+		-basefont, -bgsound, -command, -frame,
+		-image, // The spec doesn't actually say whether this allows content.
+		-isindex, -keygen, -menuitem, -nextid, -spacer
+	);
 
 	pub mod attributes {
 		use super::Sealed;
 
 		attributes! {html=>
-			accept on [input],
+			accept on [input, -form],
 			//accept_charset on [form],
 			accesskey on all,
 			action on [form],
-			align on [::deprecated::applet, caption, col, colgroup, hr, iframe, img, table, tbody, td, tfoot, th, thead, tr],
+			align on [applet, caption, col, colgroup, hr, iframe, img, table, tbody, td, tfoot, th, thead, tr],
 			allow on [iframe],
-			alt on [::deprecated::applet, area, img, input],
+			alt on [applet, area, img, input],
 			//r#async on [script],
 			autocapitalize on all,
 			autocomplete on [form, input, select, textarea],
-			autofocus on [button, input, ::deprecated::keygen, select, textarea],
+			autofocus on [button, input, keygen, select, textarea],
 			autoplay on [audio, video],
+			-background on [body, table, td, th],
+			-bgcolor on [body, col, colgroup, marquee, table, tbody, tfoot, td, th, tr],
+			-border on [img, object, table],
 			buffered on [audio, video],
 			capture on [input],
-			challenge on [::deprecated::keygen],
+			challenge on [keygen],
 			charset on [meta, script],
-			checked on [::deprecated::command, input],
+			checked on [command, input],
 			cite on [blockquote, del, ins, q],
 			class on all,
-			code on [::deprecated::applet],
-			codebase on [::deprecated::applet],
+			code on [applet],
+			codebase on [applet],
+			-color on [basefont, font, hr],
 			cols on [textarea],
-		}
-
-		/// Deprecated attributes and deprecated usages of attributes.
-		pub mod deprecrated {
-			use super::Sealed;
-
-			attributes! {html=>
-				accept on [form],
-				background on [body, table, td, th],
-				bgcolor on [body, col, colgroup, ::deprecated::marquee, table, tbody, tfoot, td, th, tr],
-				border on [img, object, table],
-				color on [::deprecated::basefont, ::deprecated::font, hr],
-			}
 		}
 	}
 }

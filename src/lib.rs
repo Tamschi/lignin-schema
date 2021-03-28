@@ -215,7 +215,8 @@ pub mod html {
 			/// Instead of setting a [***margin***](https://developer.mozilla.org/en-US/docs/Web/CSS/margin)
 			/// on [`<br>`](`br`), prefer changing the [***line-height***](https://developer.mozilla.org/en-US/docs/Web/CSS/line-height)
 			/// of the surroundng element.
-			br, wbr
+			br,
+			wbr
 		);
 		// Image and multimedia
 		elements!(audio, map, video);

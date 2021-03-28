@@ -37,9 +37,14 @@ macro_rules! element_attribute_trait {
 			#[deprecated = "To quote MDN: Warning: \"These are old HTML elements which are deprecated and should not be used. You should never use them in new projects, and should replace them in old projects as soon as you can. They are listed here for informational purposes only.\""]
 			$(compile_error!($deprecated))?
 		)?
-		pub trait $name: Sealed {}
-		#[allow(deprecated)]
-		impl<T> $name for T where T: Global {}
+		#[allow(non_snake_case)]
+		pub mod $name {
+			use super::{Global, Sealed};
+
+			pub trait Attribute: Sealed {}
+			#[allow(deprecated)]
+			impl<T> Attribute for T where T: Global {}
+		}
 	};
 }
 
@@ -57,17 +62,11 @@ macro_rules! elements {
 		#[inline(always)]
 		#[must_use]
 		$(#[$($attribute_token)*])*
-		pub fn $name(_has_content: &dyn MaybeContent, _: &[&dyn $name]) -> &'static str {
+		pub fn $name(_has_content: &dyn MaybeContent, _: &[&dyn $name::Attribute]) -> &'static str {
 			heck_but_macros::stringify_SHOUTY_SNEK_CASE!($name)
 		}
 
-		element_attribute_trait!(
-			$(
-				-
-				$(compile_error!($deprecated))?
-			)?
-			$name
-		);
+		element_attribute_trait!($(-$($deprecated)?)? $name);
 	)*};
 }
 
@@ -83,12 +82,13 @@ macro_rules! void_elements {
 		)?
 		#[inline(always)]
 		#[must_use]
+		#[allow(deprecated)]
 		$(#[$($attribute_token)*])*
-		pub fn $name(_: &NoContent, _: &[&dyn $name]) -> &'static str {
+		pub fn $name(_: &NoContent, _: &[&dyn $name::Attribute]) -> &'static str {
 			heck_but_macros::stringify_SHOUTY_SNEK_CASE!($name)
 		}
 
-		element_attribute_trait!($name);
+		element_attribute_trait!($(-$($deprecated)?)? $name);
 	)*};
 }
 
@@ -144,7 +144,7 @@ macro_rules! attributes {
 			)?
 			#[allow(deprecated)]
 			$(#[$($impl_attribute_token)*])*
-			impl crate::$namespace::elements::$element for $name {}
+			impl crate::$namespace::elements::$element::Attribute for $name {}
 		)*)?
 		$(
 			#[allow(deprecated)]
@@ -403,17 +403,11 @@ macro_rules! elements {
 		#[inline(always)]
 		#[must_use]
 		$(#[$($attribute_token)*])*
-		pub fn $name(_has_content: &dyn MaybeContent, _: &[&dyn $name]) -> &'static str {
+		pub fn $name(_has_content: &dyn MaybeContent, _: &[&dyn $name::Attribute]) -> &'static str {
 			stringify!($name)
 		}
 
-		element_attribute_trait!(
-			$(
-				-
-				$(compile_error!($deprecated))?
-			)?
-			$name
-		);
+		element_attribute_trait!($(-$($deprecated)?)? $name);
 	)*};
 }
 macro_rules! void_elements {
@@ -430,7 +424,7 @@ macro_rules! void_elements {
 		#[inline(always)]
 		#[must_use]
 		$(#[$($attribute_token)*])*
-		pub fn $name(_: &NoContent, _: &[&dyn $name]) -> &'static str {
+		pub fn $name(_: &NoContent, _: &[&dyn $name::Attribute]) -> &'static str {
 			stringify!($name)
 		}
 

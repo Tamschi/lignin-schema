@@ -55,7 +55,7 @@ macro_rules! elements {
 		)?
 		#[inline(always)]
 		#[must_use]
-		pub fn $name(_has_content: &dyn MaybeContent, _attributes: &[&dyn $name]) -> &'static str {
+		pub fn $name(_has_content: &dyn MaybeContent, _: &[&dyn $name]) -> &'static str {
 			heck_but_macros::stringify_SHOUTY_SNEK_CASE!($name)
 		}
 
@@ -80,7 +80,7 @@ macro_rules! void_elements {
 		)?
 		#[inline(always)]
 		#[must_use]
-		pub fn $name(_: &NoContent, _attributes: &[&dyn $name]) -> &'static str {
+		pub fn $name(_: &NoContent, _: &[&dyn $name]) -> &'static str {
 			heck_but_macros::stringify_SHOUTY_SNEK_CASE!($name)
 		}
 
@@ -370,7 +370,7 @@ macro_rules! elements {
 		)?
 		#[inline(always)]
 		#[must_use]
-		pub fn $name(_has_content: &dyn MaybeContent, _attributes: &[&dyn $name]) -> &'static str {
+		pub fn $name(_has_content: &dyn MaybeContent, _: &[&dyn $name]) -> &'static str {
 			stringify!($name)
 		}
 
@@ -395,7 +395,7 @@ macro_rules! void_elements {
 		)?
 		#[inline(always)]
 		#[must_use]
-		pub fn $name(_: &NoContent, _attributes: &[&dyn $name]) -> &'static str {
+		pub fn $name(_: &NoContent, _: &[&dyn $name]) -> &'static str {
 			stringify!($name)
 		}
 

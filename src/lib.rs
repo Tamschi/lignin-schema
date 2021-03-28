@@ -45,6 +45,7 @@ macro_rules! element_attribute_trait {
 
 macro_rules! elements {
 	($(
+		$(#[$($attribute_token:tt)*])*
 		$(-$(-$deprecated:tt)?)?
 		$name:ident
 	),*$(,)?) => {$(
@@ -55,6 +56,7 @@ macro_rules! elements {
 		)?
 		#[inline(always)]
 		#[must_use]
+		$(#[$($attribute_token)*])*
 		pub fn $name(_has_content: &dyn MaybeContent, _: &[&dyn $name]) -> &'static str {
 			heck_but_macros::stringify_SHOUTY_SNEK_CASE!($name)
 		}
@@ -71,6 +73,7 @@ macro_rules! elements {
 
 macro_rules! void_elements {
 	($(
+		$(#[$($attribute_token:tt)*])*
 		$(-$(-$deprecated:tt)?)?
 		$name:ident
 	),*$(,)?) => {$(
@@ -80,6 +83,7 @@ macro_rules! void_elements {
 		)?
 		#[inline(always)]
 		#[must_use]
+		$(#[$($attribute_token)*])*
 		pub fn $name(_: &NoContent, _: &[&dyn $name]) -> &'static str {
 			heck_but_macros::stringify_SHOUTY_SNEK_CASE!($name)
 		}
@@ -91,11 +95,13 @@ macro_rules! void_elements {
 macro_rules! attributes {
 	{$namespace:ident=>
 		$(
+			$(#[$($attribute_token:tt)*])*
 			$(-$(-$deprecated:tt)?)?
 			$(*$(*$experimental:tt)?)?
 			$(!$(!$obsolete:tt)?)?
 			$name:ident on
 			$([$(
+				$(#[$($impl_attribute_token:tt)*])*
 				$(-$(-$deprecated_impl:tt)?)?
 				$element:ident
 			),*$(,)?])?
@@ -103,20 +109,21 @@ macro_rules! attributes {
 		),*$(,)?
 	} => {$(
 		$(
-			#[deprecated = "This deprecated API should no longer be used, but will probably still work."]
+			#[deprecated = "deprecated - probably still supported, but discouraged (usually in favor of a better alternative)."]
 			/// `deprecated`
 			$(compile_error!($deprecated))?
 		)?
 		$(
-			#[deprecated = "This is an experimental API that should not be used in production code."]
+			#[deprecated = "experimental - not for production code and likely not well supported yet."]
 			/// `experimental`
 			$(compile_error!($experimental))?
 		)?
 		$(
-			#[deprecated = "This is an obsolete API and is no longer guaranteed to work."]
+			#[deprecated = "obsolete - most likely removed from most browsers that used to support it."]
 			/// `obsolete`
 			$(compile_error!($obsolete))?
 		)?
+		$(#[$($attribute_token)*])*
 		pub struct $name;
 		#[allow(deprecated)]
 		impl $name {
@@ -131,10 +138,12 @@ macro_rules! attributes {
 		$($(
 			$(
 				#[allow(useless_deprecated)] //TODO: Where else to put this?
-				#[deprecated = "TODO"]
+				#[deprecated = "deprecated - This particular usage of the attributes will probably still work, but is discouraged."]
+				/// `deprecated`
 				$(compile_error!($deprecated_impl))?
 			)?
 			#[allow(deprecated)]
+			$(#[$($impl_attribute_token)*])*
 			impl crate::$namespace::elements::$element for $name {}
 		)*)?
 		$(
@@ -176,7 +185,29 @@ pub mod html {
 			a, abbr, b, bdi, bdo, cite, code, data, dfn, em, i, kbd, mark, q, rb, rp, rt, rtc,
 			ruby, s, samp, small, span, strong, sub, sup, time, u, var
 		);
-		void_elements!(br, wbr);
+		void_elements!(
+			/// Produces a line break (carriage-return) in text.
+			///
+			/// See <https://developer.mozilla.org/en-US/docs/Web/HTML/Element/br>.
+			///
+			/// # Acessibility
+			///
+			/// Do not use repetitions of this element to create spaced paragraphs.
+			/// Encountering these repetitions may be confusing when using a screen-reader,
+			/// which may announce each [`<br>`](`br`) separately.
+			///
+			/// Instead, prefer [`<p>`](`p`) elements and control [***margin***](https://developer.mozilla.org/en-US/docs/Web/CSS/margin)s
+			/// via CSS.
+			///
+			/// # Styling
+			///
+			/// [`<br>`](`br`) elements generally lack dimension and visual output, which means they mostly can't be styled.
+			///
+			/// Instead of setting a [***margin***](https://developer.mozilla.org/en-US/docs/Web/CSS/margin)
+			/// on [`<br>`](`br`), prefer changing the [***line-height***](https://developer.mozilla.org/en-US/docs/Web/CSS/line-height)
+			/// of the surroundng element.
+			br, wbr
+		);
 		// Image and multimedia
 		elements!(audio, map, video);
 		void_elements!(area, img, track);
@@ -359,6 +390,7 @@ pub mod html {
 // Replace element macros due to different name casing.
 macro_rules! elements {
 	($(
+		$(#[$($attribute_token:tt)*])*
 		$(-$(-$deprecated:tt)?)?
 		$name:ident
 	),*$(,)?) => {$(
@@ -370,6 +402,7 @@ macro_rules! elements {
 		)?
 		#[inline(always)]
 		#[must_use]
+		$(#[$($attribute_token)*])*
 		pub fn $name(_has_content: &dyn MaybeContent, _: &[&dyn $name]) -> &'static str {
 			stringify!($name)
 		}
@@ -385,6 +418,7 @@ macro_rules! elements {
 }
 macro_rules! void_elements {
 	($(
+		$(#[$($attribute_token:tt)*])*
 		$(-$(-$deprecated:tt)?)?
 		$name:ident
 	),*$(,)?) => {$(
@@ -395,6 +429,7 @@ macro_rules! void_elements {
 		)?
 		#[inline(always)]
 		#[must_use]
+		$(#[$($attribute_token)*])*
 		pub fn $name(_: &NoContent, _: &[&dyn $name]) -> &'static str {
 			stringify!($name)
 		}
@@ -501,26 +536,28 @@ pub mod aria_attributes {
 
 	macro_rules! aria_attributes {
 		{$(
+			$(#[$($attribute_token:tt)*])*
 			$(-$(-$deprecated:tt)?)?
 			$(*$(*$experimental:tt)?)?
 			$(!$(!$obsolete:tt)?)?
 			$name:ident
 		),*$(,)?} => {$(
 			$(
-				#[deprecated = "This deprecated API should no longer be used, but will probably still work."]
+				#[deprecated = "deprecated - probably still supported, but discouraged (usually in favor of a better alternative)."]
 				/// `deprecated`
 				$(compile_error!($deprecated))?
 			)?
 			$(
-				#[deprecated = "This is an experimental API that should not be used in production code."]
+				#[deprecated = "experimental - not for production code and likely not well supported yet."]
 				/// `experimental`
 				$(compile_error!($experimental))?
 			)?
 			$(
-				#[deprecated = "This is an obsolete API and is no longer guaranteed to work."]
+				#[deprecated = "obsolete - most likely removed from most browsers that used to support it."]
 				/// `obsolete`
 				$(compile_error!($obsolete))?
 			)?
+			$(#[$($attribute_token)*])*
 			pub struct $name;
 			#[allow(deprecated)]
 			impl $name {
@@ -643,12 +680,12 @@ pub mod events {
 		),*$(,)?) => {$(
 
 			$(
-				#[deprecated = "This feature is no longer recommended."]
+				#[deprecated = "deprecated - probably still supported, but discouraged (usually in favor of a better alternative)."]
 				/// `deprecated`
 				$(compile_error!($deprecated))?
 			)?
 			$(
-				#[deprecated = "This feature is non-standard and is not on a standards track."]
+				#[deprecated = "non-standard (not on a standards track) - likely not well supported or with incompatible implementations."]
 				/// `non-standard`
 				$(compile_error!($non_standard))?
 			)?

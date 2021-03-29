@@ -10,20 +10,21 @@ pub mod readme {
 }
 
 mod private {
-	use crate::{Empty, HasContent};
-
 	pub trait Sealed {}
-	impl Sealed for Empty {}
-	impl Sealed for HasContent {}
 }
 use private::Sealed;
 
 pub trait Global<Aspect: ?Sized>: Sealed {}
-impl<Aspect: ?Sized, T> html::Global<Aspect> for T where T: Global<Aspect> {}
-impl<Aspect: ?Sized, T> svg::Global<Aspect> for T where T: Global<Aspect> {}
 
-pub struct Empty;
-pub struct HasContent;
+pub trait HasContent: Sealed {
+	#[inline(always)]
+	fn static_validate_on(_: Self)
+	where
+		Self: Sized,
+	{
+		// Intentionally left empty.
+	}
+}
 
 #[deprecated = "Don't specify aspects directly, which may be too limiting. Generic type parameter resolution should never fail as there are no overloaded implementations."]
 pub mod aspects {
@@ -48,23 +49,20 @@ macro_rules! element_common {
 			$(compile_error!($deprecated))?
 		)?
 		$(#[$($attribute_token)*])*
-		pub trait $name<Aspect: ?Sized>: Sealed {
-			#[inline(always)]
-			fn static_validate(_: Self) where Self: Sized {
-				// Intentionally left blank.
-			}
-		}
+		pub struct $name;
 
 		#[allow(deprecated)]
-		impl dyn $name<()> {
+		impl $name {
 			#[must_use]
 			pub const TAG_NAME: &'static str = $tag_name;
 		}
 
 		#[allow(deprecated)]
-		impl<T> $name<dyn Global<Attribute>> for T where T: Global<Attribute> {}
+		impl Sealed for $name {}
 		#[allow(deprecated)]
-		impl<T> $name<dyn Global<Event>> for T where T: Global<Event> {}
+		impl<Aspect: ?Sized> Global<Aspect> for $name {}
+		#[allow(deprecated)]
+		impl<Aspect: ?Sized> crate::Global<Aspect> for $name {}
 	};
 }
 
@@ -82,9 +80,7 @@ macro_rules! elements {
 		}
 
 		#[allow(deprecated)]
-		impl $name<Content> for Empty {}
-		#[allow(deprecated)]
-		impl $name<Content> for HasContent {}
+		impl HasContent for $name {}
 	)*};
 }
 
@@ -95,15 +91,12 @@ macro_rules! void_elements {
 		$name:ident
 	),*$(,)?} => {$(
 		element_common! {
-			/// [`Empty`]
+			/// [***Empty.***](https://developer.mozilla.org/en-US/docs/Glossary/empty_element)
 			$(#[$($attribute_token)*])*
 			$(-$($deprecated)?)? $name {
 				tag_name: heck_but_macros::stringify_SHOUTY_SNEK_CASE!($name),
 			}
 		}
-
-		#[allow(deprecated)]
-		impl $name<Empty> for Empty {}
 	)*};
 }
 
@@ -138,29 +131,42 @@ macro_rules! attribute {
 			/// `obsolete`
 			$(compile_error!($obsolete))?
 		)?
-		$(#[$($attribute_token)*])*
-		pub struct $name;
 		#[allow(deprecated)]
-		impl $name {
+		$(#[$($attribute_token)*])*
+		pub trait $name<Aspect: ?Sized = Attribute>: Sealed {
+			#[inline(always)]
+			fn static_validate_on(_: Self) where Self: Sized {
+				// Intentionally left blank.
+			}
+		}
+		#[allow(deprecated)]
+		impl dyn $name<Attribute> {
 			#[must_use]
 			pub const NAME: &'static str = heck_but_macros::stringify_kebab_case!($name);
 		}
-		#[allow(deprecated)]
-		impl Sealed for $name {}
 		$($(
+			#[allow(useless_deprecated)] //TODO: Where else to put this?
 			$(
-				#[allow(useless_deprecated)] //TODO: Where else to put this?
 				#[deprecated = "deprecated - This particular usage of the attribute will probably still work, but is discouraged."]
 				/// `deprecated`
 				$(compile_error!($deprecated_impl))?
 			)?
 			#[allow(deprecated)]
 			$(#[$($impl_attribute_token)*])*
-			impl crate::$namespace::elements::$element<Attribute> for $name {}
+			impl $name<Attribute> for crate::$namespace::elements::$element {
+				$(
+					#[deprecated = "deprecated - This particular usage of the attribute will probably still work, but is discouraged."]
+					$(compile_error!($deprecated_impl))?
+				)?
+				#[inline(always)]
+				fn static_validate_on(_: Self) {
+					// Intentionally left blank.
+				}
+			}
 		)*)?
 		$(
 			#[allow(deprecated)]
-			impl crate::$namespace::Global<Attribute> for $name {}
+			impl<T: crate::$namespace::Global<Attribute>> $name<Attribute> for T {}
 			$(compile_error!($global_marker))?
 		)?
 	)*};
@@ -175,10 +181,7 @@ pub mod html {
 	pub mod elements {
 		use super::Global;
 		#[allow(deprecated)]
-		use crate::{
-			aspects::{Attribute, Content, Event},
-			Empty, HasContent, Sealed,
-		};
+		use crate::{HasContent, Sealed};
 
 		// Main root
 		elements!(html);
@@ -268,7 +271,7 @@ pub mod html {
 		#[allow(deprecated)]
 		use crate::aspects::Attribute;
 
-		pub use crate::aria_attribute::*;
+		pub use crate::aria_attributes::*;
 
 		attribute! {html=>
 			accept on [input, -form],
@@ -415,10 +418,7 @@ pub mod svg {
 	pub mod elements {
 		use super::Global;
 		#[allow(deprecated)]
-		use crate::{
-			aspects::{Attribute, Content, Event},
-			Empty, HasContent, Sealed,
-		};
+		use crate::{HasContent, Sealed};
 
 		// Separate element macros due to different name casing.
 		macro_rules! elements {
@@ -435,9 +435,7 @@ pub mod svg {
 				}
 
 				#[allow(deprecated)]
-				impl $name<Content> for Empty {}
-				#[allow(deprecated)]
-				impl $name<Content> for HasContent {}
+				impl HasContent for $name {}
 			)*};
 		}
 		macro_rules! void_elements {
@@ -447,15 +445,12 @@ pub mod svg {
 				$name:ident
 			),*$(,)?) => {$(
 				element_common! {
-					/// [`Empty`]
+					/// [***Empty.***](https://developer.mozilla.org/en-US/docs/Glossary/empty_element)
 					$(#[$($attribute_token)*])*
 					$(-$($deprecated)?)? $name {
 						tag_name: stringify!($name),
 					}
 				}
-
-				#[allow(deprecated)]
-				impl $name<Content> for Empty {}
 			)*};
 		}
 
@@ -531,20 +526,17 @@ pub mod svg {
 	pub mod attributes {
 		use super::Sealed;
 
-		pub use crate::aria_attribute::*;
+		pub use crate::aria_attributes::*;
 
 		attribute! {svg=>
 		}
 	}
 }
 
-pub trait AriaAttribute: Sealed {}
-#[allow(deprecated)]
-impl<T> Global<Attribute> for T where T: AriaAttribute {}
-
 /// See <https://www.w3.org/TR/wai-aria-1.1/#state_prop_def>.
-pub mod aria_attribute {
-	use crate::{AriaAttribute, Sealed};
+pub mod aria_attributes {
+	#[allow(deprecated)]
+	use crate::{Attribute, Global, Sealed};
 
 	macro_rules! aria_attribute {
 		{$(
@@ -569,20 +561,21 @@ pub mod aria_attribute {
 				/// `obsolete`
 				$(compile_error!($obsolete))?
 			)?
-			$(#[$($attribute_token)*])*
-			pub struct $name;
 			#[allow(deprecated)]
-			impl $name {
+			$(#[$($attribute_token)*])*
+			pub trait $name<Aspect: ?Sized = Attribute>: Sealed {
 				#[inline(always)]
-				#[must_use]
-				pub const fn attribute_name() -> &'static str {
-					heck_but_macros::stringify_kebab_case!($name)
+				fn static_validate_on(_: Self) where Self: Sized {
+					// Intentionally no operation.
 				}
 			}
 			#[allow(deprecated)]
-			impl Sealed for $name {}
+			impl dyn $name<Attribute> {
+				#[must_use]
+				pub const NAME: &'static str = heck_but_macros::stringify_kebab_case!($name);
+			}
 			#[allow(deprecated)]
-			impl AriaAttribute for $name {}
+			impl<T: Global<Attribute>> $name<dyn Global<Attribute>> for T {}
 		)*};
 	}
 
@@ -716,11 +709,15 @@ pub mod events {
 				$(compile_error!($all))?
 			)?)?
 			#[allow(clippy::upper_case_acronyms)]
-			pub struct $name;
 			#[allow(deprecated)]
-			impl Sealed for $name {}
+			pub trait $name<Aspect: ?Sized = Event>: Sealed {
+				#[inline(always)]
+				fn static_validate_on(_: Self) where Self: Sized {
+					// Intentionally left empty.
+				}
+			}
 			#[allow(deprecated)]
-			impl EventInfo for $name {
+			impl EventInfo for dyn $name<Event> {
 				const NAME: &'static str = stringify!($name);
 				$(
 					type Bubbles = Yes;
@@ -738,16 +735,16 @@ pub mod events {
 			}
 			$(
 				#[allow(deprecated)]
-				impl Global<Event> for $name {}
+				impl<T: Global<Event>> $name<dyn Global<Event>> for T {}
 				$(compile_error!($bubbles))?
 			)?
 			$(
 				$($(
-					impl crate::$namespace::elements::$element<Event> for $name {}
+					impl $name<Event> for crate::$namespace::elements::$element {}
 				)*)?
 				$(
 					#[allow(deprecated)]
-					impl Global<Event> for $name {}
+					impl<T: Global<Event>> $name<dyn Global<Event>> for T {}
 					$(compile_error!($all))?
 				)?
 			)?

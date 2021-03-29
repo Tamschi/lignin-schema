@@ -4,17 +4,15 @@ use lignin_schema::{
 		attributes::{class, href},
 		elements::{a, br},
 	},
-	Empty, HasContent,
+	HasContent,
 };
 
 pub fn validate() {
-	br::static_validate(Empty);
-	br::static_validate(class);
-	br::static_validate(click);
+	class::static_validate_on(br);
+	click::static_validate_on(br);
 
-	a::static_validate(Empty);
-	a::static_validate(HasContent);
-	a::static_validate(class);
-	a::static_validate(href);
-	a::static_validate(click);
+	HasContent::static_validate_on(a);
+	class::static_validate_on(a);
+	href::static_validate_on(a);
+	click::static_validate_on(a);
 }

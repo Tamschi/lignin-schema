@@ -25,12 +25,14 @@ impl<Aspect: ?Sized, T> svg::Global<Aspect> for T where T: Global<Aspect> {}
 pub struct Empty;
 pub struct HasContent;
 
+#[deprecated = "Don't specify aspects directly, which may be too limiting. Generic type parameter resolution should never fail as there are no overloaded implementations."]
 pub mod aspects {
 	enum Vacant {}
 	pub struct Content(Vacant);
 	pub struct Attribute(Vacant);
 	pub struct Event(Vacant);
 }
+#[allow(deprecated)]
 use aspects::Attribute;
 
 macro_rules! element_common {
@@ -169,6 +171,7 @@ pub mod html {
 	/// See <https://developer.mozilla.org/en-US/docs/Web/HTML/Element>.
 	pub mod elements {
 		use super::Global;
+		#[allow(deprecated)]
 		use crate::{
 			aspects::{Attribute, Content, Event},
 			Empty, HasContent, Sealed,
@@ -259,6 +262,7 @@ pub mod html {
 	/// See <https://developer.mozilla.org/en-US/docs/Web/HTML/Attribute>.
 	pub mod attributes {
 		use super::Sealed;
+		#[allow(deprecated)]
 		use crate::aspects::Attribute;
 
 		pub use crate::aria_attribute::*;
@@ -407,6 +411,7 @@ pub mod svg {
 	/// See <https://developer.mozilla.org/en-US/docs/Web/SVG/Element>.
 	pub mod elements {
 		use super::Global;
+		#[allow(deprecated)]
 		use crate::{
 			aspects::{Attribute, Content, Event},
 			Empty, HasContent, Sealed,
@@ -531,6 +536,7 @@ pub mod svg {
 }
 
 pub trait AriaAttribute: Sealed {}
+#[allow(deprecated)]
 impl<T> Global<Attribute> for T where T: AriaAttribute {}
 
 /// See <https://www.w3.org/TR/wai-aria-1.1/#state_prop_def>.
@@ -667,6 +673,7 @@ pub trait EventInfo: Sealed {
 /// Implied by [↕️ - Bubbles](#---bubbles).
 pub mod events {
 	use super::{EventInfo, Global, No, Sealed, Yes};
+	#[allow(deprecated)]
 	use crate::aspects::Event;
 
 	macro_rules! events {
@@ -736,6 +743,7 @@ pub mod events {
 					impl crate::$namespace::elements::$element<Event> for $name {}
 				)*)?
 				$(
+					#[allow(deprecated)]
 					impl Global<Event> for $name {}
 					$(compile_error!($all))?
 				)?

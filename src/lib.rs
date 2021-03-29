@@ -10,10 +10,10 @@ pub mod readme {
 }
 
 mod private {
-	use crate::{NoContent, SomeContent};
+	use crate::{Empty, SomeContent};
 
 	pub trait Sealed {}
-	impl Sealed for NoContent {}
+	impl Sealed for Empty {}
 	impl Sealed for SomeContent {}
 }
 use private::Sealed;
@@ -23,9 +23,9 @@ impl<T> html::Global for T where T: Global {}
 impl<T> svg::Global for T where T: Global {}
 
 pub trait MaybeContent: Sealed {}
-pub struct NoContent;
+pub struct Empty;
 pub struct SomeContent;
-impl MaybeContent for NoContent {}
+impl MaybeContent for Empty {}
 impl MaybeContent for SomeContent {}
 
 macro_rules! element_common {
@@ -78,7 +78,7 @@ macro_rules! void_elements {
 		$name:ident
 	),*$(,)?} => {$(
 		element_common! {
-			/// [`NoContent`]
+			/// [`Empty`]
 			$(#[$($attribute_token)*])*
 			$(-$($deprecated)?)? $name {
 				tag_name: heck_but_macros::stringify_SHOUTY_SNEK_CASE!($name),
@@ -86,7 +86,7 @@ macro_rules! void_elements {
 		}
 
 		#[allow(deprecated)]
-		impl $name<NoContent> for NoContent {}
+		impl $name<Empty> for Empty {}
 	)*};
 }
 
@@ -160,7 +160,7 @@ pub mod html {
 	/// See <https://developer.mozilla.org/en-US/docs/Web/HTML/Element>.
 	pub mod elements {
 		use super::Global;
-		use crate::{MaybeContent, NoContent, Sealed};
+		use crate::{MaybeContent, Empty, Sealed};
 
 		// Main root
 		elements!(html);
@@ -394,7 +394,7 @@ pub mod svg {
 	/// See <https://developer.mozilla.org/en-US/docs/Web/SVG/Element>.
 	pub mod elements {
 		use super::Global;
-		use crate::{MaybeContent, NoContent, Sealed};
+		use crate::{MaybeContent, Empty, Sealed};
 
 		// Separate element macros due to different name casing.
 		macro_rules! elements {
@@ -421,7 +421,7 @@ pub mod svg {
 				$name:ident
 			),*$(,)?) => {$(
 				element_common! {
-					/// [`NoContent`]
+					/// [`Empty`]
 					$(#[$($attribute_token)*])*
 					$(-$($deprecated)?)? $name {
 						tag_name: stringify!($name),
@@ -429,7 +429,7 @@ pub mod svg {
 				}
 
 				#[allow(deprecated)]
-				impl $name<NoContent> for NoContent {}
+				impl $name<Empty> for Empty {}
 			)*};
 		}
 

@@ -52,6 +52,7 @@ macro_rules! element_common {
 
 		#[allow(deprecated)]
 		impl<Aspect: ?Sized> dyn $name<Aspect> {
+			#[must_use]
 			pub const TAG_NAME: &'static str = $tag_name;
 		}
 
@@ -136,11 +137,8 @@ macro_rules! attribute {
 		pub struct $name;
 		#[allow(deprecated)]
 		impl $name {
-			#[inline(always)]
 			#[must_use]
-			pub const fn attribute_name() -> &'static str {
-				heck_but_macros::stringify_kebab_case!($name)
-			}
+			pub const NAME: &'static str = heck_but_macros::stringify_kebab_case!($name);
 		}
 		#[allow(deprecated)]
 		impl Sealed for $name {}

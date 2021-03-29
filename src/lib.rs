@@ -183,6 +183,8 @@ pub mod html {
 		#[allow(deprecated)]
 		use crate::{HasContent, Sealed};
 
+		//TODO: This should be an alphabetic list instead.
+
 		// Main root
 		elements!(html);
 		// Document metadata
@@ -197,7 +199,38 @@ pub mod html {
 		);
 		// Text content
 		elements!(
-			blockquote, dd, div, dl, dt, figcaption, figure, hr, li, /*main,*/ ol, p, pre, ul
+			blockquote,
+			dd,
+			/// A generic layout container without semantic meaning, by default rendered with [***display: block***](https://developer.mozilla.org/en-US/docs/Web/CSS/display#outside).
+			///
+			/// See <https://developer.mozilla.org/en-US/docs/Web/HTML/Element/div>.
+			///
+			/// # Accessibility
+			///
+			/// A [`<div>`](`div`) itself (but not necessarily its content) is by default completely ignored when building the accessibility tree.
+			///
+			/// It's generally possible to adjust this behavior freely by applying [`aria_attributes`](`crate::aria_attributes`) directly to the element,
+			/// but this can be complex, error prone for developers not already very familiar with the topic and confusing
+			/// if the implemented behavior doesn't match what would be expected for its content and context.
+			///
+			/// Where available, strongly prefer semantic HTML elements with implicit [***WAI-ARIA Roles***](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles),
+			/// and don't overuse landmark rules as this can make a document "noisy" and harder to skim with assistive technology.
+			///
+			/// # See also
+			///
+			/// [`<span>`](`span`), [`class<Attribute>`](`super::attributes::class`)
+			div,
+			dl,
+			dt,
+			figcaption,
+			figure,
+			hr,
+			li,
+			/*main,*/
+			ol,
+			p,
+			pre,
+			ul
 		);
 		// Inline text semantics
 		elements!(

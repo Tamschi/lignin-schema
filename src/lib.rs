@@ -10,23 +10,28 @@ pub mod readme {
 }
 
 mod private {
-	use crate::{Empty, SomeContent};
+	use crate::{Empty, HasContent};
 
 	pub trait Sealed {}
 	impl Sealed for Empty {}
-	impl Sealed for SomeContent {}
+	impl Sealed for HasContent {}
 }
 use private::Sealed;
 
-pub trait Global: Sealed {}
-impl<T> html::Global for T where T: Global {}
-impl<T> svg::Global for T where T: Global {}
+pub trait Global<Aspect: ?Sized>: Sealed {}
+impl<Aspect: ?Sized, T> html::Global<Aspect> for T where T: Global<Aspect> {}
+impl<Aspect: ?Sized, T> svg::Global<Aspect> for T where T: Global<Aspect> {}
 
-pub trait MaybeContent: Sealed {}
 pub struct Empty;
-pub struct SomeContent;
-impl MaybeContent for Empty {}
-impl MaybeContent for SomeContent {}
+pub struct HasContent;
+
+mod aspects {
+	enum Vacant {}
+	pub struct Content(Vacant);
+	pub struct Attribute(Vacant);
+	pub struct Event(Vacant);
+}
+use aspects::Attribute;
 
 macro_rules! element_common {
 	(
@@ -41,7 +46,9 @@ macro_rules! element_common {
 			$(compile_error!($deprecated))?
 		)?
 		$(#[$($attribute_token)*])*
-		pub trait $name<Aspect: ?Sized>: Sealed {}
+		pub trait $name<Aspect: ?Sized>: Sealed {
+			fn static_validate(_: Self) where Self: Sized {}
+		}
 
 		#[allow(deprecated)]
 		impl<Aspect: ?Sized> dyn $name<Aspect> {
@@ -49,7 +56,9 @@ macro_rules! element_common {
 		}
 
 		#[allow(deprecated)]
-		impl<T> $name<dyn Global> for T where T: Global {}
+		impl<T> $name<dyn Global<Attribute>> for T where T: Global<Attribute> {}
+		#[allow(deprecated)]
+		impl<T> $name<dyn Global<Event>> for T where T: Global<Event> {}
 	};
 }
 
@@ -67,7 +76,9 @@ macro_rules! elements {
 		}
 
 		#[allow(deprecated)]
-		impl<T> $name<dyn MaybeContent> for T where T: MaybeContent {}
+		impl $name<Content> for Empty {}
+		#[allow(deprecated)]
+		impl $name<Content> for HasContent {}
 	)*};
 }
 
@@ -90,7 +101,7 @@ macro_rules! void_elements {
 	)*};
 }
 
-macro_rules! attributes {
+macro_rules! attribute {
 	{$namespace:ident=>
 		$(
 			$(#[$($attribute_token:tt)*])*
@@ -136,17 +147,17 @@ macro_rules! attributes {
 		$($(
 			$(
 				#[allow(useless_deprecated)] //TODO: Where else to put this?
-				#[deprecated = "deprecated - This particular usage of the attributes will probably still work, but is discouraged."]
+				#[deprecated = "deprecated - This particular usage of the attribute will probably still work, but is discouraged."]
 				/// `deprecated`
 				$(compile_error!($deprecated_impl))?
 			)?
 			#[allow(deprecated)]
 			$(#[$($impl_attribute_token)*])*
-			impl crate::$namespace::elements::$element<$name> for $name {}
+			impl crate::$namespace::elements::$element<Attribute> for $name {}
 		)*)?
 		$(
 			#[allow(deprecated)]
-			impl crate::$namespace::Global for $name {}
+			impl crate::$namespace::Global<Attribute> for $name {}
 			$(compile_error!($global_marker))?
 		)?
 	)*};
@@ -155,12 +166,15 @@ macro_rules! attributes {
 pub mod html {
 	use crate::Sealed;
 
-	pub trait Global: Sealed {}
+	pub trait Global<Aspect: ?Sized>: Sealed {}
 
 	/// See <https://developer.mozilla.org/en-US/docs/Web/HTML/Element>.
 	pub mod elements {
 		use super::Global;
-		use crate::{Empty, MaybeContent, Sealed};
+		use crate::{
+			aspects::{Attribute, Content, Event},
+			Empty, HasContent, Sealed,
+		};
 
 		// Main root
 		elements!(html);
@@ -244,13 +258,14 @@ pub mod html {
 		);
 	}
 
-	/// See <https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes>.
+	/// See <https://developer.mozilla.org/en-US/docs/Web/HTML/Attribute>.
 	pub mod attributes {
 		use super::Sealed;
+		use crate::aspects::Attribute;
 
-		pub use crate::aria_attributes::*;
+		pub use crate::aria_attribute::*;
 
-		attributes! {html=>
+		attribute! {html=>
 			accept on [input, -form],
 			// accept_charset on [form],
 			accesskey on all,
@@ -389,12 +404,15 @@ pub mod html {
 pub mod svg {
 	use crate::Sealed;
 
-	pub trait Global: Sealed {}
+	pub trait Global<Aspect: ?Sized>: Sealed {}
 
 	/// See <https://developer.mozilla.org/en-US/docs/Web/SVG/Element>.
 	pub mod elements {
 		use super::Global;
-		use crate::{Empty, MaybeContent, Sealed};
+		use crate::{
+			aspects::{Attribute, Content, Event},
+			Empty, HasContent, Sealed,
+		};
 
 		// Separate element macros due to different name casing.
 		macro_rules! elements {
@@ -411,7 +429,9 @@ pub mod svg {
 				}
 
 				#[allow(deprecated)]
-				impl<T> $name<dyn MaybeContent> for T where T: MaybeContent {}
+				impl $name<Content> for Empty {}
+				#[allow(deprecated)]
+				impl $name<Content> for HasContent {}
 			)*};
 		}
 		macro_rules! void_elements {
@@ -429,7 +449,7 @@ pub mod svg {
 				}
 
 				#[allow(deprecated)]
-				impl $name<Empty> for Empty {}
+				impl $name<Content> for Empty {}
 			)*};
 		}
 
@@ -501,25 +521,25 @@ pub mod svg {
 		elements!(linearGradient, meshgradient, radialGradient, stop); //TODO: Check casing on `meshgradient`.
 	}
 
-	/// See <https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes>.
+	/// See <https://developer.mozilla.org/en-US/docs/Web/HTML/Attribute>.
 	pub mod attributes {
 		use super::Sealed;
 
-		pub use crate::aria_attributes::*;
+		pub use crate::aria_attribute::*;
 
-		attributes! {svg=>
+		attribute! {svg=>
 		}
 	}
 }
 
 pub trait AriaAttribute: Sealed {}
-impl<T> Global for T where T: AriaAttribute {}
+impl<T> Global<Attribute> for T where T: AriaAttribute {}
 
 /// See <https://www.w3.org/TR/wai-aria-1.1/#state_prop_def>.
-pub mod aria_attributes {
+pub mod aria_attribute {
 	use crate::{AriaAttribute, Sealed};
 
-	macro_rules! aria_attributes {
+	macro_rules! aria_attribute {
 		{$(
 			$(#[$($attribute_token:tt)*])*
 			$(-$(-$deprecated:tt)?)?
@@ -559,7 +579,7 @@ pub mod aria_attributes {
 		)*};
 	}
 
-	aria_attributes!(
+	aria_attribute!(
 		role,
 		// aria_activedescendant,
 		// aria_atomic,
@@ -625,7 +645,7 @@ impl YesNo for No {
 	const IS_YES: bool = false;
 }
 
-pub trait Event: Sealed {
+pub trait EventInfo: Sealed {
 	const NAME: &'static str;
 	type Bubbles: YesNo;
 	type Cancelable: YesNo;
@@ -648,7 +668,8 @@ pub trait Event: Sealed {
 ///
 /// Implied by [↕️ - Bubbles](#---bubbles).
 pub mod events {
-	use super::{Event, Global, No, Sealed, Yes};
+	use super::{EventInfo, Global, No, Sealed, Yes};
+	use crate::aspects::Event;
 
 	macro_rules! events {
 		($(
@@ -691,7 +712,7 @@ pub mod events {
 			#[allow(deprecated)]
 			impl Sealed for $name {}
 			#[allow(deprecated)]
-			impl Event for $name {
+			impl EventInfo for $name {
 				const NAME: &'static str = stringify!($name);
 				$(
 					type Bubbles = Yes;
@@ -709,15 +730,15 @@ pub mod events {
 			}
 			$(
 				#[allow(deprecated)]
-				impl Global for $name {}
+				impl Global<Event> for $name {}
 				$(compile_error!($bubbles))?
 			)?
 			$(
 				$($(
-					impl crate::$namespace::elements::$element for $name {}
+					impl crate::$namespace::elements::$element<Event> for $name {}
 				)*)?
 				$(
-					impl Global for $name {}
+					impl Global<Event> for $name {}
 					$(compile_error!($all))?
 				)?
 			)?

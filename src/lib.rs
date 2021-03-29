@@ -160,7 +160,7 @@ pub mod html {
 	/// See <https://developer.mozilla.org/en-US/docs/Web/HTML/Element>.
 	pub mod elements {
 		use super::Global;
-		use crate::{MaybeContent, Empty, Sealed};
+		use crate::{Empty, MaybeContent, Sealed};
 
 		// Main root
 		elements!(html);
@@ -394,7 +394,7 @@ pub mod svg {
 	/// See <https://developer.mozilla.org/en-US/docs/Web/SVG/Element>.
 	pub mod elements {
 		use super::Global;
-		use crate::{MaybeContent, Empty, Sealed};
+		use crate::{Empty, MaybeContent, Sealed};
 
 		// Separate element macros due to different name casing.
 		macro_rules! elements {

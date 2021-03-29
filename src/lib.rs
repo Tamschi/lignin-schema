@@ -25,7 +25,7 @@ impl<Aspect: ?Sized, T> svg::Global<Aspect> for T where T: Global<Aspect> {}
 pub struct Empty;
 pub struct HasContent;
 
-mod aspects {
+pub mod aspects {
 	enum Vacant {}
 	pub struct Content(Vacant);
 	pub struct Attribute(Vacant);

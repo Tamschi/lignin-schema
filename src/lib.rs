@@ -53,7 +53,7 @@ macro_rules! element_common {
 		}
 
 		#[allow(deprecated)]
-		impl<Aspect: ?Sized> dyn $name<Aspect> {
+		impl dyn $name<()> {
 			#[must_use]
 			pub const TAG_NAME: &'static str = $tag_name;
 		}

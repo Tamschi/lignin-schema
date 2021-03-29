@@ -18,13 +18,9 @@ mod private {
 }
 use private::Sealed;
 
-pub trait GlobalAttribute: Sealed {}
-impl<T> html::GlobalAttribute for T where T: GlobalAttribute {}
-impl<T> svg::GlobalAttribute for T where T: GlobalAttribute {}
-
-pub trait GlobalEvent: Sealed {}
-impl<T> html::GlobalEvent for T where T: GlobalEvent {}
-impl<T> svg::GlobalEvent for T where T: GlobalEvent {}
+pub trait Global: Sealed {}
+impl<T> html::Global for T where T: Global {}
+impl<T> svg::Global for T where T: Global {}
 
 pub trait MaybeContent: Sealed {}
 pub struct NoContent;
@@ -32,71 +28,65 @@ pub struct SomeContent;
 impl MaybeContent for NoContent {}
 impl MaybeContent for SomeContent {}
 
-macro_rules! element_traits {
+macro_rules! element_common {
 	(
+		$(#[$($attribute_token:tt)*])*
 		$(-$(-$deprecated:tt)?)?
-		$name:ident
+		$name:ident {
+			tag_name: $tag_name:expr,
+		}
 	) => {
 		$(
-			#[deprecated = "To quote MDN: Warning: \"These are old HTML elements which are deprecated and should not be used. You should never use them in new projects, and should replace them in old projects as soon as you can. They are listed here for informational purposes only.\""]
+			#[deprecated = "To quote MDN: Warning: \"These are old […] elements which are deprecated and should not be used. You should never use them in new projects, and should replace them in old projects as soon as you can. They are listed here for informational purposes only.\""]
 			$(compile_error!($deprecated))?
 		)?
-		#[allow(non_snake_case)]
-		pub mod $name {
-			use super::{GlobalAttribute, GlobalEvent, Sealed};
+		$(#[$($attribute_token)*])*
+		pub trait $name<Aspect: ?Sized>: Sealed {}
 
-			pub trait Attribute: Sealed {}
-			#[allow(deprecated)]
-			impl<T> Attribute for T where T: GlobalAttribute {}
-
-			pub trait Event: Sealed {}
-			#[allow(deprecated)]
-			impl<T> Event for T where T: GlobalEvent {}
+		#[allow(deprecated)]
+		impl<Aspect: ?Sized> dyn $name<Aspect> {
+			pub const TAG_NAME: &'static str = $tag_name;
 		}
+
+		#[allow(deprecated)]
+		impl<T> $name<dyn Global> for T where T: Global {}
 	};
 }
 
 macro_rules! elements {
-	($(
+	{$(
 		$(#[$($attribute_token:tt)*])*
 		$(-$(-$deprecated:tt)?)?
 		$name:ident
-	),*$(,)?) => {$(
-		#[allow(deprecated)]
-		$(
-			#[deprecated = "To quote MDN: Warning: \"These are old HTML elements which are deprecated and should not be used. You should never use them in new projects, and should replace them in old projects as soon as you can. They are listed here for informational purposes only.\""]
-			$(compile_error!($deprecated))?
-		)?
-		#[inline(always)]
-		#[must_use]
-		$(#[$($attribute_token)*])*
-		pub fn $name(_has_content: &dyn MaybeContent, _: &[&dyn $name::Attribute], _: &[&dyn $name::Event]) -> &'static str {
-			heck_but_macros::stringify_SHOUTY_SNEK_CASE!($name)
+	),*$(,)?} => {$(
+		element_common! {
+			$(#[$($attribute_token)*])*
+			$(-$($deprecated)?)? $name {
+				tag_name: heck_but_macros::stringify_SHOUTY_SNEK_CASE!($name),
+			}
 		}
 
-		element_traits!($(-$($deprecated)?)? $name);
+		#[allow(deprecated)]
+		impl<T> $name<dyn MaybeContent> for T where T: MaybeContent {}
 	)*};
 }
 
 macro_rules! void_elements {
-	($(
+	{$(
 		$(#[$($attribute_token:tt)*])*
 		$(-$(-$deprecated:tt)?)?
 		$name:ident
-	),*$(,)?) => {$(
-		$(
-			#[deprecated = "To quote MDN: Warning: \"These are old HTML elements which are deprecated and should not be used. You should never use them in new projects, and should replace them in old projects as soon as you can. They are listed here for informational purposes only.\""]
-			$(compile_error!($deprecated))?
-		)?
-		#[inline(always)]
-		#[must_use]
-		#[allow(deprecated)]
-		$(#[$($attribute_token)*])*
-		pub fn $name(_: &NoContent, _: &[&dyn $name::Attribute], _: &[&dyn $name::Event]) -> &'static str {
-			heck_but_macros::stringify_SHOUTY_SNEK_CASE!($name)
+	),*$(,)?} => {$(
+		element_common! {
+			/// [`NoContent`]
+			$(#[$($attribute_token)*])*
+			$(-$($deprecated)?)? $name {
+				tag_name: heck_but_macros::stringify_SHOUTY_SNEK_CASE!($name),
+			}
 		}
 
-		element_traits!($(-$($deprecated)?)? $name);
+		#[allow(deprecated)]
+		impl $name<NoContent> for NoContent {}
 	)*};
 }
 
@@ -152,11 +142,11 @@ macro_rules! attributes {
 			)?
 			#[allow(deprecated)]
 			$(#[$($impl_attribute_token)*])*
-			impl crate::$namespace::elements::$element::Attribute for $name {}
+			impl crate::$namespace::elements::$element<$name> for $name {}
 		)*)?
 		$(
 			#[allow(deprecated)]
-			impl crate::$namespace::GlobalAttribute for $name {}
+			impl crate::$namespace::Global for $name {}
 			$(compile_error!($global_marker))?
 		)?
 	)*};
@@ -165,12 +155,11 @@ macro_rules! attributes {
 pub mod html {
 	use crate::Sealed;
 
-	pub trait GlobalAttribute: Sealed {}
-	pub trait GlobalEvent: Sealed {}
+	pub trait Global: Sealed {}
 
 	/// See <https://developer.mozilla.org/en-US/docs/Web/HTML/Element>.
 	pub mod elements {
-		use super::{GlobalAttribute, GlobalEvent};
+		use super::Global;
 		use crate::{MaybeContent, NoContent, Sealed};
 
 		// Main root
@@ -397,61 +386,52 @@ pub mod html {
 	}
 }
 
-// Replace element macros due to different name casing.
-macro_rules! elements {
-	($(
-		$(#[$($attribute_token:tt)*])*
-		$(-$(-$deprecated:tt)?)?
-		$name:ident
-	),*$(,)?) => {$(
-		#[allow(deprecated)]
-		#[allow(non_snake_case)]
-		$(
-			#[deprecated = "To quote MDN: Warning: \"These are old SVG elements which are deprecated and should not be used. You should never use them in new projects, and should replace them in old projects as soon as you can. They are listed here for informational purposes only.\""]
-			$(compile_error!($deprecated))?
-		)?
-		#[inline(always)]
-		#[must_use]
-		$(#[$($attribute_token)*])*
-		pub fn $name(_has_content: &dyn MaybeContent, _: &[&dyn $name::Attribute], _: &[&dyn $name::Event]) -> &'static str {
-			stringify!($name)
-		}
-
-		element_traits!($(-$($deprecated)?)? $name);
-	)*};
-}
-macro_rules! void_elements {
-	($(
-		$(#[$($attribute_token:tt)*])*
-		$(-$(-$deprecated:tt)?)?
-		$name:ident
-	),*$(,)?) => {$(
-		#[allow(non_snake_case)]
-		$(
-			#[deprecated = "To quote MDN: Warning: \"These are old SVG elements which are deprecated and should not be used. You should never use them in new projects, and should replace them in old projects as soon as you can. They are listed here for informational purposes only.\""]
-			$(compile_error!($deprecated))?
-		)?
-		#[inline(always)]
-		#[must_use]
-		$(#[$($attribute_token)*])*
-		pub fn $name(_: &NoContent, _: &[&dyn $name::Attribute], _: &[&dyn $name::Event]) -> &'static str {
-			stringify!($name)
-		}
-
-		element_traits!($name);
-	)*};
-}
-
 pub mod svg {
 	use crate::Sealed;
 
-	pub trait GlobalAttribute: Sealed {}
-	pub trait GlobalEvent: Sealed {}
+	pub trait Global: Sealed {}
 
 	/// See <https://developer.mozilla.org/en-US/docs/Web/SVG/Element>.
 	pub mod elements {
-		use super::{GlobalAttribute, GlobalEvent};
+		use super::Global;
 		use crate::{MaybeContent, NoContent, Sealed};
+
+		// Separate element macros due to different name casing.
+		macro_rules! elements {
+			($(
+				$(#[$($attribute_token:tt)*])*
+				$(-$(-$deprecated:tt)?)?
+				$name:ident
+			),*$(,)?) => {$(
+				element_common! {
+					$(#[$($attribute_token)*])*
+					$(-$($deprecated)?)? $name {
+						tag_name: stringify!($name),
+					}
+				}
+
+				#[allow(deprecated)]
+				impl<T> $name<dyn MaybeContent> for T where T: MaybeContent {}
+			)*};
+		}
+		macro_rules! void_elements {
+			($(
+				$(#[$($attribute_token:tt)*])*
+				$(-$(-$deprecated:tt)?)?
+				$name:ident
+			),*$(,)?) => {$(
+				element_common! {
+					/// [`NoContent`]
+					$(#[$($attribute_token)*])*
+					$(-$($deprecated)?)? $name {
+						tag_name: stringify!($name),
+					}
+				}
+
+				#[allow(deprecated)]
+				impl $name<NoContent> for NoContent {}
+			)*};
+		}
 
 		// Animation elements
 		elements!(
@@ -533,7 +513,7 @@ pub mod svg {
 }
 
 pub trait AriaAttribute: Sealed {}
-impl<T> GlobalAttribute for T where T: AriaAttribute {}
+impl<T> Global for T where T: AriaAttribute {}
 
 /// See <https://www.w3.org/TR/wai-aria-1.1/#state_prop_def>.
 pub mod aria_attributes {
@@ -668,7 +648,7 @@ pub trait Event: Sealed {
 ///
 /// Implied by [↕️ - Bubbles](#---bubbles).
 pub mod events {
-	use super::{Event, GlobalEvent, No, Sealed, Yes};
+	use super::{Event, Global, No, Sealed, Yes};
 
 	macro_rules! events {
 		($(
@@ -729,15 +709,15 @@ pub mod events {
 			}
 			$(
 				#[allow(deprecated)]
-				impl GlobalEvent for $name {}
+				impl Global for $name {}
 				$(compile_error!($bubbles))?
 			)?
 			$(
 				$($(
-					impl crate::$namespace::elements::$element::Event for $name {}
+					impl crate::$namespace::elements::$element for $name {}
 				)*)?
 				$(
-					impl GlobalEvent for $name {}
+					impl Global for $name {}
 					$(compile_error!($all))?
 				)?
 			)?

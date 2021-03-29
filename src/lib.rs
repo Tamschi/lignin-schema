@@ -49,7 +49,10 @@ macro_rules! element_common {
 		)?
 		$(#[$($attribute_token)*])*
 		pub trait $name<Aspect: ?Sized>: Sealed {
-			fn static_validate(_: Self) where Self: Sized {}
+			#[inline(always)]
+			fn static_validate(_: Self) where Self: Sized {
+				// Intentionally left blank.
+			}
 		}
 
 		#[allow(deprecated)]

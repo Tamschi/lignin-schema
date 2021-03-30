@@ -365,7 +365,26 @@ pub mod html {
 			height on [canvas, embed, iframe, img, input, object, video], // and deprecated `on all`, but this can't be expressed without min_specialization.
 			hidden on all,
 			high on [meter],
+
+			/// The [***URL***](https://url.spec.whatwg.org/) pointed to by a link-like element.
+			///
+			/// # Available on
+			///
+			/// [`<a>`](`super::elements::a`),
+			/// [`<area>`](`super::elements::area`),
+			/// [`<base>`](`super::elements::base`),
+			/// [`<link>`](`super::elements::link`).
+			///
+			/// # Notable [`href`] patterns
+			///
+			/// - Fragment URLs starting with `#` to link to a section of the current page,
+			/// - an absolute URL starting with `//` to remain on `http://` or `https://`,
+			/// - `mailto:` followed an email address,
+			/// - `tel:` followed by a phone number (primarily useful on mobile).
+			///
+			/// [Media fragment support appears to be limited.](https://caniuse.com/media-fragments)
 			href on [a, area, base, link],
+
 			hreflang on [a, area, link],
 			// http_equiv on [meta],
 			icon on [command],

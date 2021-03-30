@@ -145,19 +145,13 @@ macro_rules! attribute {
 			pub const NAME: &'static str = heck_but_macros::stringify_kebab_case!($name);
 		}
 		$($(
-			#[allow(useless_deprecated)] //TODO: Where else to put this?
 			$(
-				#[deprecated = "deprecated - This particular usage of the attribute will probably still work, but is discouraged."]
-				/// `deprecated`
+				/// `deprecated` //TODO: Is there a way to deprecate specific trait implementations?
 				$(compile_error!($deprecated_impl))?
 			)?
 			#[allow(deprecated)]
 			$(#[$($impl_attribute_token)*])*
 			impl $name<Attribute> for crate::$namespace::elements::$element {
-				$(
-					#[deprecated = "deprecated - This particular usage of the attribute will probably still work, but is discouraged."]
-					$(compile_error!($deprecated_impl))?
-				)?
 				#[inline(always)]
 				fn static_validate_on(_: Self) {
 					// Intentionally left blank.

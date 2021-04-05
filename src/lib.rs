@@ -697,6 +697,24 @@ pub trait EventInfo: Sealed {
 	type Cancelable: YesNo;
 }
 
+pub trait YesBubbles {
+	const OK: () = ();
+}
+impl<T: ?Sized> YesBubbles for T where T: EventInfo<Bubbles = Yes> {}
+pub trait NoBubbles {
+	const OK: () = ();
+}
+impl<T: ?Sized> NoBubbles for T where T: EventInfo<Bubbles = No> {}
+
+pub trait YesCancelable {
+	const OK: () = ();
+}
+impl<T: ?Sized> YesCancelable for T where T: EventInfo<Cancelable = Yes> {}
+pub trait NoCancelable {
+	const OK: () = ();
+}
+impl<T: ?Sized> NoCancelable for T where T: EventInfo<Cancelable = No> {}
+
 /// See <https://developer.mozilla.org/en-US/docs/Web/Events#event_listing>.
 ///
 /// This module only covers associations on [***Element***](https://developer.mozilla.org/en-US/docs/Web/API/Element)

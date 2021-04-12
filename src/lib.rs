@@ -113,13 +113,14 @@ macro_rules! attribute {
 	{$namespace:ident=>
 		$(
 			$(#[$($attribute_token:tt)*])*
-			$(-$(-$deprecated:tt)?)?
-			$(*$(*$experimental:tt)?)?
-			$(!$(!$obsolete:tt)?)?
+			$(-$(@$deprecated:tt)?)?
+			$(*$(@$experimental:tt)?)?
+			$(!$(@$obsolete:tt)?)?
 			$name:ident on
 			$([$(
 				$(#[$($impl_attribute_token:tt)*])*
-				$(-$(-$deprecated_impl:tt)?)?
+				$(-$(@$deprecated_impl:tt)?)?
+				$(%$(@$non_standard_impl:tt)?)?
 				$element:ident
 			),*$(,)?])?
 			$(all $($global_marker:ident)?)?
@@ -128,17 +129,17 @@ macro_rules! attribute {
 		$(
 			#[deprecated = "deprecated - probably still supported, but discouraged (usually in favor of a better alternative)."]
 			/// `deprecated`
-			$(compile_error!($deprecated))?
+			$(@$deprecated)?
 		)?
 		$(
 			#[deprecated = "experimental - not for production code and likely not well supported yet."]
 			/// `experimental`
-			$(compile_error!($experimental))?
+			$(@$experimental)?
 		)?
 		$(
 			#[deprecated = "obsolete - most likely removed from most browsers that used to support it."]
 			/// `obsolete`
-			$(compile_error!($obsolete))?
+			$(@$obsolete)?
 		)?
 		#[allow(deprecated)]
 		$(#[$($attribute_token)*])*
@@ -155,8 +156,14 @@ macro_rules! attribute {
 		}
 		$($(
 			$(
-				/// `deprecated` //TODO: Is there a way to deprecate specific trait implementations?
-				$(compile_error!($deprecated_impl))?
+				/// `deprecated`
+				//TODO: Is there a way to deprecate specific trait implementations?
+				$(@$deprecated_impl)?
+			)?
+			$(
+				/// `non-standard`
+				//TODO: Is there a way to deprecate specific trait implementations?
+				$(@$non_standard_impl)?
 			)?
 			#[allow(deprecated)]
 			$(#[$($impl_attribute_token)*])*
@@ -349,7 +356,14 @@ pub mod html {
 			// accept_charset on [form],
 			accesskey on all,
 			action on [form],
-			align on [applet, caption, col, colgroup, hr, iframe, img, table, tbody, td, tfoot, th, thead, tr],
+			align on [
+				applet, caption, col, colgroup,
+
+				/// The alignment of the rule. Defaults to `left`.
+				-hr,
+
+				iframe, img, table, tbody, td, tfoot, th, thead, tr,
+			],
 			allow on [iframe],
 			alt on [applet, area, img, input],
 			// r#async on [script],
@@ -369,7 +383,12 @@ pub mod html {
 			class on all,
 			code on [applet],
 			codebase on [applet],
-			-color on [basefont, font, hr],
+			-color on [
+				basefont, font,
+
+				/// The color of the rule, by name or hexadecimal value.
+				%hr,
+			],
 			cols on [textarea],
 			colspan on [td, th],
 			content on [meta],
@@ -453,6 +472,10 @@ pub mod html {
 			muted on [audio, video],
 			name on [button, form, fieldset, iframe, input, keygen, object, output, select, textarea, map, meta, param],
 			novalidate on [form],
+			noshade on [
+				/// Disables shading.
+				-hr,
+			],
 			open on [details],
 			optimum on [meter],
 			pattern on [input],
@@ -473,7 +496,14 @@ pub mod html {
 			!scoped on [style],
 			selected on [option],
 			shape on [a, area],
-			size on [input, select],
+			size on [
+				input,
+
+				/// The height of the rule in pixels.
+				-hr,
+
+				select,
+			],
 			sizes on [link, img, source],
 			slot on all,
 			span on [col, colgroup],
@@ -493,7 +523,14 @@ pub mod html {
 			// r#type on [button, input, command, embed, object, script, source, style, menu],
 			usemap on [img, input, object],
 			value on [button, data, input, li, meter, option, progress, param],
-			width on [canvas, embed, iframe, img, input, object, video], // and deprecated `on all`, but this can't be expressed without min_specialization.
+			width on [
+				canvas, embed, iframe, img, input,
+
+				/// The length of the rule as pixel or percentage value.
+				-hr,
+
+				object, video,
+			], // and deprecated `on all`, but this can't be expressed without min_specialization.
 			wrap on [textarea],
 		}
 	}

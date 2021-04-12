@@ -69,16 +69,25 @@ macro_rules! element_common {
 macro_rules! elements {
 	{$(
 		$(#[$($attribute_token:tt)*])*
-		$(-$(-$deprecated:tt)?)?
+		$(-$(@$deprecated:tt)?)?
+		$(/$(@$empty:tt)?)?
 		$name:ident
 	),*$(,)?} => {$(
 		element_common! {
+			$(
+				$(@$empty)?
+				/// [***Empty.***](https://developer.mozilla.org/en-US/docs/Glossary/empty_element)
+			)?
 			$(#[$($attribute_token)*])*
-			$(-$($deprecated)?)? $name {
+			$(-$(@$deprecated)?)? $name {
 				tag_name: heck_but_macros::stringify_SHOUTY_SNEK_CASE!($name),
 			}
 		}
 
+		$(
+			$(@$empty)?
+			#[cfg(FALSE)]
+		)?
 		#[allow(deprecated)]
 		impl HasContent for $name {}
 	)*};
@@ -218,7 +227,42 @@ pub mod html {
 			dt,
 			figcaption,
 			figure,
-			hr,
+
+			/// Thematic break, for example as sibling between [`<p>`](`p`) elements to mark a change of scene or topic withing one containing section.
+			///
+			/// See <https://developer.mozilla.org/en-US/docs/Web/HTML/Element/hr>.
+			///
+			/// [`<hr>`](`hr`) **used** to be defined as **h**orizontal **r**ule or line, but this definition has been replaced by its semantic function.
+			///
+			/// All element-specific attributes are deprecated or non-standard.
+			///
+			/// # Accessibility
+			///
+			/// [`<hr>`](`hr`)'s default ARIA [`role`](`super::attributes::role`) is [***separator***](https://w3c.github.io/aria/#separator).
+			///
+			/// Other permitted roles are [***presentation***](https://w3c.github.io/aria/#presentation)
+			/// and [***none***](https://w3c.github.io/aria/#none).
+			///
+			/// # Styling
+			///
+			/// Browsers will likely still display an unspecified line by default, but CSS should be used to define the presentation from the ground up.
+			///
+			/// When doing so, overwrite the [***border***](https://developer.mozilla.org/en-US/docs/Web/CSS/border)
+			/// CSS property, as this is normally how the default presentation is implemented,
+			/// and use [***margin-block-start***](https://developer.mozilla.org/en-US/docs/Web/CSS/margin-block-start),
+			/// [***margin-block-end***](https://developer.mozilla.org/en-US/docs/Web/CSS/margin-block-end),
+			/// [***margin-inline-start***](https://developer.mozilla.org/en-US/docs/Web/CSS/margin-inline-start)
+			/// and [***margin-inline-end***](https://developer.mozilla.org/en-US/docs/Web/CSS/margin-inline-end)
+			/// to change the positioning.
+			///
+			/// > Unlike the more specific properties, the shorthands [***margin-block***](https://developer.mozilla.org/en-US/docs/Web/CSS/margin-block)
+			/// > and [***margin-inline***](https://developer.mozilla.org/en-US/docs/Web/CSS/margin-inline)
+			/// > are not supported by Edge or Safari as of 2021-04¹⁻².
+			/// >
+			/// > ¹ <https://caniuse.com/?search=margin-block>  
+			/// > ² <https://caniuse.com/?search=margin-inline>
+			/hr,
+
 			li,
 			/*main,*/
 			ol,

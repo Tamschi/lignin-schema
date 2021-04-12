@@ -259,7 +259,7 @@ pub mod html {
 			/// > and [***margin-inline***](https://developer.mozilla.org/en-US/docs/Web/CSS/margin-inline)
 			/// > are not supported by Edge or Safari as of 2021-04¹⁻².
 			/// >
-			/// > ¹ <https://caniuse.com/?search=margin-block>  
+			/// > ¹ <https://caniuse.com/?search=margin-block>
 			/// > ² <https://caniuse.com/?search=margin-inline>
 			/hr,
 

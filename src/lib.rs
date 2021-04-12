@@ -235,7 +235,7 @@ pub mod html {
 			figcaption,
 			figure,
 
-			/// Thematic break, for example as sibling between [`<p>`](`p`) elements to mark a change of scene or topic withing one containing section.
+			/// Thematic break, for example as sibling between [`<p>`](`p`) elements to mark a change of scene or topic within one containing section.
 			///
 			/// See <https://developer.mozilla.org/en-US/docs/Web/HTML/Element/hr>.
 			///

@@ -372,7 +372,14 @@ pub mod html {
 			autofocus on [button, input, keygen, select, textarea],
 			autoplay on [audio, video],
 			-background on [body, table, td, th],
+
+			/// Use the CSS property [***background-color***](https://developer.mozilla.org/en-US/docs/Web/CSS/background-color)
+			/// instead.
+			///
+			/// While the intended use of this attribute was with named or hexadecimal colors,
+			/// [in practice various other strings are also accepted due to a lenient parsing scheme](https://stackoverflow.com/questions/8318911/why-does-html-think-chucknorris-is-a-color).
 			-bgcolor on [body, col, colgroup, marquee, table, tbody, tfoot, td, th, tr],
+
 			-border on [img, object, table],
 			buffered on [audio, video],
 			capture on [input],

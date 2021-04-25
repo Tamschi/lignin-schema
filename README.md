@@ -13,7 +13,9 @@
 [![open pull requests](https://img.shields.io/github/issues-pr-raw/Tamschi/lignin-schema)](https://github.com/Tamschi/lignin-schema/pulls)
 [![crev reviews](https://web.crev.dev/rust-reviews/badge/crev_count/lignin-schema.svg)](https://web.crev.dev/rust-reviews/crate/lignin-schema/)
 
-TODO: Description.
+Partial HTML, MathML and SVG schemas as static APIs, with documentation and deprecation attributes.
+
+This can be used by macro crates to implement errors, warnings and hover docs, without the schema information being available to and/or processed by the macro itself.
 
 Works well alongside [lignin](https://github.com/Tamschi/lignin) but does not depend on it.
 

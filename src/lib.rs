@@ -93,22 +93,6 @@ macro_rules! elements {
 	)*};
 }
 
-macro_rules! void_elements {
-	{$(
-		$(#[$($attribute_token:tt)*])*
-		$(-$(-$deprecated:tt)?)?
-		$name:ident
-	),*$(,)?} => {$(
-		element_common! {
-			/// [***Empty.***](https://developer.mozilla.org/en-US/docs/Glossary/empty_element)
-			$(#[$($attribute_token)*])*
-			$(-$($deprecated)?)? $name {
-				tag_name: heck_but_macros::stringify_SHOUTY_SNEK_CASE!($name),
-			}
-		}
-	)*};
-}
-
 macro_rules! attribute {
 	{$namespace:ident=>
 		$(
@@ -193,24 +177,13 @@ pub mod html {
 		#[allow(deprecated)]
 		use crate::{HasContent, Sealed};
 
-		//TODO: This should be an alphabetic list instead.
+		// When you edit an element, also move it to its alphabetically-ordered position.
+		// Use a sparate commit if it already had documentation or if you change its modifiers!
+		elements!(
+			html, head, style, title, /base, /link, /meta, body, address, article, aside, footer,
+			header, h1, h2, h3, h4, h5, h6, hgroup, main, nav, section,
+			blockquote, dd,
 
-		// Main root
-		elements!(html);
-		// Document metadata
-		elements!(head, style, title);
-		void_elements!(base, link, meta);
-		// Sectioning root
-		elements!(body);
-		// Content sectioning
-		elements!(
-			address, article, aside, footer, header, h1, h2, h3, h4, h5, h6, hgroup, main, nav,
-			section
-		);
-		// Text content
-		elements!(
-			blockquote,
-			dd,
 			/// A generic layout container without semantic meaning, by default rendered with [***display: block***](https://developer.mozilla.org/en-US/docs/Web/CSS/display#outside).
 			///
 			/// See <https://developer.mozilla.org/en-US/docs/Web/HTML/Element/div>.
@@ -270,19 +243,9 @@ pub mod html {
 			/// > 2. <https://caniuse.com/?search=margin-inline>
 			/hr,
 
-			li,
-			/*main,*/
-			ol,
-			p,
-			pre,
-			ul
-		);
-		// Inline text semantics
-		elements!(
-			a, abbr, b, bdi, bdo, cite, code, data, dfn, em, i, kbd, mark, q, rb, rp, rt, rtc,
-			ruby, s, samp, small, span, strong, sub, sup, time, u, var
-		);
-		void_elements!(
+			li, ol, p, pre, ul, a, abbr, b, bdi, bdo, cite, code, data, dfn, em, i, kbd, mark, q, rb, rp, rt, rtc,
+			ruby, s, samp, small, span, strong, sub, sup, time, u, var,
+
 			/// Produces a line break (carriage-return) in text.
 			///
 			/// See <https://developer.mozilla.org/en-US/docs/Web/HTML/Element/br>.
@@ -303,43 +266,26 @@ pub mod html {
 			/// Instead of setting a [***margin***](https://developer.mozilla.org/en-US/docs/Web/CSS/margin)
 			/// on [`<br>`](`br`), prefer changing the [***line-height***](https://developer.mozilla.org/en-US/docs/Web/CSS/line-height)
 			/// of the surroundng element.
-			br,
-			wbr
-		);
-		// Image and multimedia
-		elements!(audio, map, video);
-		void_elements!(area, img, track);
-		// Embedded content
-		elements!(iframe, object, picture);
-		void_elements!(embed, param, source);
-		// Scripting
-		elements!(canvas, noscript, script);
-		// Demarcating edits
-		elements!(del, ins);
-		// Table content
-		elements!(caption, colgroup, table, tbody, td, tfoot, th, thead, tr);
-		void_elements!(col);
-		// Forms
-		elements!(
-			button, datalist, fieldset, form, label, legend, meter, optgroup, option, output,
-			progress, select, textarea
-		);
-		void_elements!(input);
-		// Interactive elements
-		elements!(details, dialog, menu, summary);
-		// Web components
-		elements!(slot, template);
+			/br,
 
-		// Deprecated
-		elements!(
+			/wbr, audio, map, video, /area, /img, /track,
+			iframe, object, picture, /embed, /param, /source,
+			canvas, noscript, script,
+			del, ins,
+			caption, colgroup, table, tbody, td, tfoot, th, thead, tr, /col,
+			button, datalist, fieldset, form, label, legend, meter, optgroup, option, output,
+			progress, select, textarea, /input,
+			details, dialog, menu, summary,
+			slot, template,
 			-acronym, -applet, -big, -blink, -center, -content, -dir, -element, -font, -frameset,
 			-listing, -marquee, -multicol, -nobr, -noembed, -noframes, -plaintext, -shadow,
 			-strike, -tt, -xmp,
-		);
-		void_elements!(
-			-basefont, -bgsound, -command, -frame,
-			-image, // The spec doesn't actually say whether this allows content.
-			-isindex, -keygen, -menuitem, -nextid, -spacer
+			-/basefont, -/bgsound, -/command, -/frame,
+
+			/// > The spec doesn't actually say whether this allows content.
+			-/image,
+
+			-/isindex, -/keygen, -/menuitem, -/nextid, -/spacer
 		);
 	}
 

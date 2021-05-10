@@ -186,39 +186,6 @@ pub mod html {
 		// When you edit an element, also move it to its alphabetically-ordered position.
 		// Use a sparate commit if it already had documentation or if you change its modifiers!
 		elements!(
-			/// Document-unique metadata header.
-			///
-			/// See <https://developer.mozilla.org/en-US/docs/Web/HTML/Element/head>.
-			///
-			/// This element is intended only for machine-readable metadata.
-			/// For human-visible metadata, use [`<header>`](`header`) instead.
-			///
-			/// In HTML5-compliant browsers, [`<head>`](`head`) is created automatically in the DOM even if completely absent from markup. **Very** old browsers may behave differently here.
-			///
-			/// # Accessibility
-			///
-			/// This element has neither a default [`role`](`super::attributes::role`) nor permitted alternatives.
-			///
-			/// # Constraints
-			///
-			/// [`<head>`](`head`) may occur only as first child [***element***](https://developer.mozilla.org/en-US/docs/Glossary/Element)
-			/// of an [`<html>`](`html`) element.
-			///
-			/// # Optional Tags
-			///
-			/// The [`<head>`](`head`) element can be implied in serialized HTML as follows:
-			///
-			/// ## Start Tag
-			///
-			/// The start tag can be omitted iff this element's first child node is an [***element***](https://developer.mozilla.org/en-US/docs/Glossary/Element).
-			///
-			/// > Note that "child nodes" can include text containing only whitespace!
-			/// > Omitting `<head>` from serialized HTML will change the resulting DOM structure unless the next element follows **immediately**.
-			///
-			/// ## End Tag
-			///
-			/// Can be omitted iff this element's next sibling is neither a comment nor a text node starting with a space character.
-			head,
 
 			/// Document-unique content and sectioning root.
 			///
@@ -286,6 +253,40 @@ pub mod html {
 			/// * The [`<body>`](`body`) has content or a start tag, and
 			/// * it is not immediately followed by a comment.
 			body,
+
+			/// Document-unique metadata header.
+			///
+			/// See <https://developer.mozilla.org/en-US/docs/Web/HTML/Element/head>.
+			///
+			/// This element is intended only for machine-readable metadata.
+			/// For human-visible metadata, use [`<header>`](`header`) instead.
+			///
+			/// In HTML5-compliant browsers, [`<head>`](`head`) is created automatically in the DOM even if completely absent from markup. **Very** old browsers may behave differently here.
+			///
+			/// # Accessibility
+			///
+			/// This element has neither a default [`role`](`super::attributes::role`) nor permitted alternatives.
+			///
+			/// # Constraints
+			///
+			/// [`<head>`](`head`) may occur only as first child [***element***](https://developer.mozilla.org/en-US/docs/Glossary/Element)
+			/// of an [`<html>`](`html`) element.
+			///
+			/// # Optional Tags
+			///
+			/// The [`<head>`](`head`) element can be implied in serialized HTML as follows:
+			///
+			/// ## Start Tag
+			///
+			/// The start tag can be omitted iff this element's first child node is an [***element***](https://developer.mozilla.org/en-US/docs/Glossary/Element).
+			///
+			/// > Note that "child nodes" can include text containing only whitespace!
+			/// > Omitting `<head>` from serialized HTML will change the resulting DOM structure unless the next element follows **immediately**.
+			///
+			/// ## End Tag
+			///
+			/// Can be omitted iff this element's next sibling is neither a comment nor a text node starting with a space character.
+			head,
 
 			html, style, title, /base, /link, /meta, address, article, aside, footer,
 			header, h1, h2, h3, h4, h5, h6, hgroup, main, nav, section,

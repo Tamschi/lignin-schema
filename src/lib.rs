@@ -93,13 +93,14 @@ macro_rules! elements {
 	)*};
 }
 
-macro_rules! attribute {
+macro_rules! attributes {
 	{$namespace:ident=>
 		$(
 			$(#[$($attribute_token:tt)*])*
 			$(-$(@$deprecated:tt)?)?
 			$(*$(@$experimental:tt)?)?
 			$(!$(@$obsolete:tt)?)?
+			$(%$(@$non_standard:tt)?)?
 			$name:ident on
 			$([$(
 				$(#[$($impl_attribute_token:tt)*])*
@@ -124,6 +125,11 @@ macro_rules! attribute {
 			#[deprecated = "obsolete - most likely removed from most browsers that used to support it."]
 			/// `obsolete`
 			$(@$obsolete)?
+		)?
+		$(
+			#[deprecated = "non-standard - may behave differently between browsers or not work at all."]
+			/// `non-standard`
+			$(@$non_standard)?
 		)?
 		#[allow(deprecated)]
 		$(#[$($attribute_token)*])*
@@ -180,7 +186,47 @@ pub mod html {
 		// When you edit an element, also move it to its alphabetically-ordered position.
 		// Use a sparate commit if it already had documentation or if you change its modifiers!
 		elements!(
-			html, head, style, title, /base, /link, /meta, body, address, article, aside, footer,
+			/// Document-unique content and sectioning root.
+			///
+			/// See <https://developer.mozilla.org/en-US/docs/Web/HTML/Element/body>.
+			///
+			/// # Accessibility
+			///
+			/// The default [`role`](`super::attributes::role`) of this element is [***document***](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/Document_Role).
+			///
+			/// No alternative roles are permitted.
+			///
+			/// # Constraints
+			///
+			/// [`<body>`](`body`) may occur only as second child [***element***](https://developer.mozilla.org/en-US/docs/Glossary/Element)
+			/// of an [`<html>`](`html`) element, after [`<head>`](`head`).
+			///
+			/// # Scripting
+			///
+			/// The [`<body>`](`body`) element is available through the [***Document.body***](https://developer.mozilla.org/en-US/docs/Web/API/Document/body)
+			/// property.
+			///
+			/// # Optional Tags
+			///
+			/// The [`<body>`](`body`) element can be implied in serialized HTML as follows:
+			///
+			/// ## Start Tag
+			///
+			/// The start tag can be omitted if no attributes are present and iff the first child node is **not** one of the following:
+			///
+			/// * a comment
+			/// * a [`<script>`](`script`) or [`<style>`](`style`) element,
+			/// * a text node starting with a space character.
+			///
+			/// ## End Tag
+			///
+			/// Can be omitted iff **both** of the following are true:
+			///
+			/// * The [`<body>`](`body`) has content or a start tag, and
+			/// * it is not immediately followed by a comment.
+			body,
+
+			html, head, style, title, /base, /link, /meta, address, article, aside, footer,
 			header, h1, h2, h3, h4, h5, h6, hgroup, main, nav, section,
 			blockquote, dd,
 
@@ -297,7 +343,7 @@ pub mod html {
 
 		pub use crate::aria_attributes::*;
 
-		attribute! {html=>
+		attributes! {html=>
 			accept on [input, -form],
 			// accept_charset on [form],
 			accesskey on all,
@@ -310,6 +356,18 @@ pub mod html {
 
 				iframe, img, table, tbody, td, tfoot, th, thead, tr,
 			],
+			-alink on [
+				/// Text color of selected hyperlinks.
+				///
+				/// Prefer CSS:
+				///
+				/// ```css
+				/// *:active {
+				///     color: …;
+				/// }
+				/// ```
+				-body
+			],
 			allow on [iframe],
 			alt on [applet, area, img, input],
 			// r#async on [script],
@@ -317,16 +375,54 @@ pub mod html {
 			autocomplete on [form, input, select, textarea],
 			autofocus on [button, input, keygen, select, textarea],
 			autoplay on [audio, video],
-			-background on [body, table, td, th],
+			-background on [
+				/// URL of a background image.
+				///
+				/// Prefer CSS:
+				///
+				/// ```css
+				/// body {
+				///     background: url(…);
+				/// }
+				/// ```
+				-body,
+
+				table, td, th,
+			],
 
 			/// Use the CSS property [***background-color***](https://developer.mozilla.org/en-US/docs/Web/CSS/background-color)
 			/// instead.
 			///
 			/// While the intended use of this attribute was with named or hexadecimal colors,
 			/// [in practice various other strings are also accepted due to a lenient parsing scheme](https://stackoverflow.com/questions/8318911/why-does-html-think-chucknorris-is-a-color).
-			-bgcolor on [body, col, colgroup, marquee, table, tbody, tfoot, td, th, tr],
+			-bgcolor on [
+				/// Background color.
+				///
+				/// Prefer CSS:
+				///
+				/// ```css
+				/// body {
+				///     background-color: …;
+				/// }
+				/// ```
+				-body,
+
+				col, colgroup, marquee, table, tbody, tfoot, td, th, tr,
+			],
 
 			-border on [img, object, table],
+			-bottommargin on [
+				/// The bottom margin of the body.
+				///
+				/// Prefer CSS:
+				///
+				/// ```css
+				/// body {
+				///     margin-bottom: …;
+				/// }
+				/// ```
+				-body,
+			],
 			buffered on [audio, video],
 			capture on [input],
 			challenge on [keygen],
@@ -410,8 +506,32 @@ pub mod html {
 			label on [optgroup, option, track],
 			lang on all,
 			-language on [script],
-			*loading on [img, iframe],
+			-leftmargin on [
+				/// The left margin of the body.
+				///
+				/// Prefer CSS:
+				///
+				/// ```css
+				/// body {
+				///     margin-left: …;
+				/// }
+				/// ```
+				-body,
+			],
 			list on [input],
+			-link on [
+				/// Text color of unvisited hyperlinks.
+				///
+				/// Prefer CSS:
+				///
+				/// ```css
+				/// *:link {
+				///     color: …;
+				/// }
+				/// ```
+				-body
+			],
+			*loading on [img, iframe],
 			// r#loop on [audio, bgsound, marquee, video],
 			low on [meter],
 			!manifest on [html],
@@ -429,6 +549,79 @@ pub mod html {
 				/// Disables shading.
 				-hr,
 			],
+			onafterprint on [
+				/// `JS` Called after the user has printed the document.
+				body,
+			],
+			onbeforeprint on [
+				/// `JS` Called when the user requests printing the document.
+				body,
+			],
+			onbeforeunload on [
+				/// `JS` Called when the document is about to be unloaded.
+				body,
+			],
+			onblur on [
+				/// `JS` Called when the document loses focus.
+				body,
+			],
+			onerror on [
+				/// `JS` Called when the document fails to load properly.
+				body,
+			],
+			onfocus on [
+				/// `JS` Called when the document receives focus.
+				body,
+			],
+			onhashchange on [
+				/// `JS` Called after the fragment identifier of the document's current address changes.
+				body,
+			],
+			*onlanguagechange on [
+				/// `JS` Called after the preferred languages change.
+				body,
+			],
+			onload on [
+				/// `JS` Called when the document has finished loading.
+				body,
+			],
+			onmessage on [
+				/// `JS` Called when the document has received a message.
+				body,
+			],
+			onoffline on [
+				/// `JS` Called when network communication has failed.
+				body,
+			],
+			ononline on [
+				/// `JS` Called when network communication is available again after failure.
+				body,
+			],
+			onpopstate on [
+				/// `JS` Called when the user has navigated session history.
+				body,
+			],
+			onredo on [
+				/// `JS` Called when the user undos an undo.
+				body,
+			],
+			onresize on [
+				/// `JS` Called after the document is resized.
+				body,
+			],
+			onstorage on [
+				//TODO: Find out what this means and elaborate.
+				/// `JS` Called when the storage area has changed.
+				body,
+			],
+			onundo on [
+				/// `JS` Called after the user undos an action via undo transaction history.
+				body,
+			],
+			onunload on [
+				/// `JS` Called when the document is being unloaded.
+				body,
+			],
 			open on [details],
 			optimum on [meter],
 			pattern on [input],
@@ -442,6 +635,18 @@ pub mod html {
 			rel on [a, area, link],
 			required on [input, select, textarea],
 			reversed on [ol],
+			-rightmargin on [
+				/// The right margin of the body.
+				///
+				/// Prefer CSS:
+				///
+				/// ```css
+				/// body {
+				///     margin-right: …;
+				/// }
+				/// ```
+				-body,
+			],
 			rows on [textarea],
 			rowspan on [td, th],
 			sandbox on [iframe],
@@ -471,11 +676,47 @@ pub mod html {
 			-summary on [table],
 			tabindex on all,
 			target on [a, area, base, form],
+			-text on [
+				/// Text color.
+				///
+				/// Prefer CSS:
+				///
+				/// ```css
+				/// body {
+				///     color: …;
+				/// }
+				/// ```
+				-body,
+			],
 			title on all,
+			-topmargin on [
+				/// The top margin of the body.
+				///
+				/// Prefer CSS:
+				///
+				/// ```css
+				/// body {
+				///     margin-top: …;
+				/// }
+				/// ```
+				-body,
+			],
 			translate on all,
 			// r#type on [button, input, command, embed, object, script, source, style, menu],
 			usemap on [img, input, object],
 			value on [button, data, input, li, meter, option, progress, param],
+			-vlink on [
+				/// Text color of visited hyperlinks.
+				///
+				/// Prefer CSS:
+				///
+				/// ```css
+				/// *:visited {
+				///     color: …;
+				/// }
+				/// ```
+				-body
+			],
 			width on [
 				canvas, embed, iframe, img, input,
 
@@ -608,7 +849,7 @@ pub mod svg {
 
 		pub use crate::aria_attributes::*;
 
-		attribute! {svg=>
+		attributes! {svg=>
 		}
 	}
 }
@@ -618,7 +859,7 @@ pub mod aria_attributes {
 	#[allow(deprecated)]
 	use crate::{Attribute, Global, Sealed};
 
-	macro_rules! aria_attribute {
+	macro_rules! aria_attributes {
 		{$(
 			$(#[$($attribute_token:tt)*])*
 			$(-$(-$deprecated:tt)?)?
@@ -659,7 +900,7 @@ pub mod aria_attributes {
 		)*};
 	}
 
-	aria_attribute!(
+	aria_attributes!(
 		role,
 		// aria_activedescendant,
 		// aria_atomic,

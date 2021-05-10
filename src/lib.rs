@@ -240,6 +240,33 @@ pub mod html {
 			/// The [`<body>`](`body`) element is available through the [***Document.body***](https://developer.mozilla.org/en-US/docs/Web/API/Document/body)
 			/// property.
 			///
+			/// # Styling
+			///
+			/// ## Overscroll
+			///
+			/// In browsers that support [overscroll](https://developer.mozilla.org/en-US/docs/Web/CSS/overscroll-behavior),
+			/// the main scroll container is usually [`<html>`](`html`).
+			///
+			/// By making sure the [`<body>`](`body`) is large enough to cover the viewport, you can style the overscroll area independently without extra elements:
+			///
+			/// ```css
+			/// html {
+			///     background: …;
+			/// }
+			///
+			/// body {
+			///     min-height: 100vh;
+			///     background: …;
+			/// }
+			/// ```
+			///
+			/// ## The Notch / Non-Rectangular Displays
+			///
+			/// > The styling situation in this regard is a bit too messy right now for me to give a recommendation,
+			/// > but such devices should still be taken into account when possible.
+			/// >
+			/// > (If you have experience in this regard, [please contribute](https://github.com/Tamschi/lignin-schema).)
+			///
 			/// # Optional Tags
 			///
 			/// The [`<body>`](`body`) element can be implied in serialized HTML as follows:

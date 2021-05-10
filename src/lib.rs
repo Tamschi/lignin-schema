@@ -288,7 +288,39 @@ pub mod html {
 			/// Can be omitted iff this element's next sibling is neither a comment nor a text node starting with a space character.
 			head,
 
-			html, style, title, /base, /link, /meta, address, article, aside, footer,
+			/// HTML document root.
+			///
+			/// See <https://developer.mozilla.org/en-US/docs/Web/HTML/Element/html>.
+			///
+			/// # Accessibility
+			///
+			/// This element has neither a default [`role`](`super::attributes::role`) nor permitted alternatives.
+			///
+			/// While optional, you should specify the [`lang`](`super::attributes::lang`) attribute on this element according to the majority of content on the page.
+			/// Prefer this over setting it on [`<body>`](`body`), as this way also the metadata in [`<head>`](`head`), like for example [`<title>`](`title`), is affected accordingly.
+			///
+			/// > The [`lang`](`super::attributes::lang`) attribute can be set on **any** HTML element, so don't be afraid to be more specific for parts of the page if the content is mixed-language.
+			///
+			/// # Constraints
+			///
+			/// [`<html>`](`html`) must occur exactly once as single root element of an HTML document.
+			///
+			/// > However, sibling comments and *maybe* whitespace text nodes appear to be possible.
+			///
+			/// # Optional Tags
+			///
+			/// The [`<html>`](`html`) element can be implied in serialized HTML as follows:
+			///
+			/// ## Start Tag
+			///
+			/// The start tag can be omitted iff this element's first child node is **not** a comment.
+			///
+			/// ## End Tag
+			///
+			/// Can be omitted iff this element's next sibling is **not** a comment.
+			html,
+
+			style, title, /base, /link, /meta, address, article, aside, footer,
 			header, h1, h2, h3, h4, h5, h6, hgroup, main, nav, section,
 			blockquote, dd,
 
@@ -596,7 +628,12 @@ pub mod html {
 			*loading on [img, iframe],
 			// r#loop on [audio, bgsound, marquee, video],
 			low on [meter],
-			!manifest on [html],
+			!manifest on [
+				/// The URI of a resource manifest that specifies caching behavior.
+				///
+				/// See <https://developer.mozilla.org/en-US/docs/Web/HTML/Using_the_application_cache> (and the included removal warnings!) for more information.
+				-html,
+			],
 			max on [input, meter, progress],
 			maxlength on [input, textarea],
 			minlength on [input, textarea],
@@ -773,6 +810,12 @@ pub mod html {
 			// r#type on [button, input, command, embed, object, script, source, style, menu],
 			usemap on [img, input, object],
 			value on [button, data, input, li, meter, option, progress, param],
+			-version on [
+				/// The HTML [***Document Type Definition***](https://developer.mozilla.org/en-US/docs/Glossary/Doctype) version.
+				///
+				/// Redundant in modern HTML documents starting with `<!DOCTYPE html>`.
+				-html
+			],
 			-vlink on [
 				/// Text color of visited hyperlinks.
 				///
@@ -794,6 +837,12 @@ pub mod html {
 				object, video,
 			], // and deprecated `on all`, but this can't be expressed without min_specialization.
 			wrap on [textarea],
+			xmlns on [
+				/// XML namespace of the document.
+				///
+				/// Optional in HTML (where it defaults to `http://www.w3.org/1999/xhtml`) but required in XML documents.
+				html,
+			],
 		}
 	}
 }

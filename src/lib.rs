@@ -2,6 +2,7 @@
 #![no_std]
 #![doc(html_root_url = "https://docs.rs/lignin-schema/0.0.4")]
 #![warn(clippy::pedantic)]
+#![allow(clippy::semicolon_if_nothing_returned)]
 #![allow(non_camel_case_types)]
 
 #[cfg(doctest)]

@@ -19,13 +19,14 @@ include = [
 	"CODE_OF_CONDUCT.md",
 	"LICENSE-*",
 	"README.md",
+	"SECURITY.md",
 ]
 publish = false
 
 [badges]
 is-it-maintained-issue-resolution = { repository = "Tamschi/lignin-schema" }
 is-it-maintained-open-issues = { repository = "Tamschi/lignin-schema" }
-maintenance = { status = "experimental" }
+maintenance = { status = "experimental" } # This may differ between branches.
 
 [dependencies]
 heck-but-macros = "0.0.1"
@@ -34,5 +35,5 @@ heck-but-macros = "0.0.1"
 cargo-husky = "1.5.0"
 doc-comment = "0.3.3"
 git_info = "0.1.2"
-version-sync = "0.9.1"
-wasm-bindgen-test = "0.3.23"
+version-sync = "0.9.3"
+wasm-bindgen-test = "0.3.28"

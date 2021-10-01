@@ -963,6 +963,7 @@ pub mod svg {
 
 	/// See <https://developer.mozilla.org/en-US/docs/Web/HTML/Attribute>.
 	pub mod attributes {
+		#[allow(unused_imports)] //TODO: Remove this once there is content here.
 		use super::Sealed;
 
 		pub use crate::aria_attributes::*;

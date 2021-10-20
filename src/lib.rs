@@ -185,7 +185,7 @@ pub mod html {
 		use crate::{HasContent, Sealed};
 
 		// When you edit an element, also move it to its alphabetically-ordered position.
-		// Use a sparate commit if it already had documentation or if you change its modifiers!
+		// Use a separate commit if it already had documentation or if you change its modifiers!
 		elements!(
 
 			/// Document-unique content and sectioning root.
@@ -353,6 +353,7 @@ pub mod html {
 			///
 			/// See <https://developer.mozilla.org/en-US/docs/Web/HTML/Element/hr>.
 			///
+			// cSpell:ignore orizontal
 			/// [`<hr>`](`hr`) **used** to be defined as **h**orizontal **r**ule or line, but this definition has been replaced by its semantic function.
 			///
 			/// All element-specific attributes are deprecated or non-standard.
@@ -391,7 +392,7 @@ pub mod html {
 			///
 			/// See <https://developer.mozilla.org/en-US/docs/Web/HTML/Element/br>.
 			///
-			/// # Acessibility
+			/// # Accessibility
 			///
 			/// Do not use repetitions of this element to create spaced paragraphs.
 			/// Encountering these repetitions may be confusing when using a screen-reader,
@@ -406,7 +407,7 @@ pub mod html {
 			///
 			/// Instead of setting a [***margin***](https://developer.mozilla.org/en-US/docs/Web/CSS/margin)
 			/// on [`<br>`](`br`), prefer changing the [***line-height***](https://developer.mozilla.org/en-US/docs/Web/CSS/line-height)
-			/// of the surroundng element.
+			/// of the surrounding element.
 			/br,
 
 			/wbr, audio, map, video, /area, /img, /track,
@@ -702,7 +703,7 @@ pub mod html {
 				body,
 			],
 			onredo on [
-				/// `JS` Called when the user undos an undo.
+				/// `JS` Called when the user undoes an undo.
 				body,
 			],
 			onresize on [
@@ -715,7 +716,7 @@ pub mod html {
 				body,
 			],
 			onundo on [
-				/// `JS` Called after the user undos an action via undo transaction history.
+				/// `JS` Called after the user undoes an action via undo transaction history.
 				body,
 			],
 			onunload on [
